@@ -1,6 +1,6 @@
-#include <crypto/CryptoExtra.h>
+#include <CryptoExtra.h>
 
-#include <crypto/cryptopp/keccak.h> // sha-3 keccak (not NIST SHA-3)
+#include <cryptopp/keccak.h> // sha-3 keccak (not NIST SHA-3)
 
 #include<iostream>
 

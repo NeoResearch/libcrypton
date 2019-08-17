@@ -4,10 +4,27 @@
 // WARNING: do not include .hpp here, or things may break!
 
 // system includes
-// none ..
+#include<vector>
 
 // core includes
-#include <system/types.h>
+//#include <system/types.h>
+
+using namespace std; // TODO: remove
+
+#define NEOPT_EXCEPTION(str)                          \
+   {                                                  \
+      printf("neopt error(%s): %s\n", __func__, str); \
+      exit(1);                                        \
+   }
+
+
+typedef unsigned char byte;
+
+typedef std::vector<byte> vbyte;
+
+typedef short int16;
+
+typedef int int32;
 
 namespace neopt {
 

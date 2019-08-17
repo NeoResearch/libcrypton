@@ -20,7 +20,7 @@
 #include <openssl/sha.h>
 */
 // core includes
-#include <crypto/ICrypto.h>
+#include <ICrypto.h>
 
 namespace neopt {
 

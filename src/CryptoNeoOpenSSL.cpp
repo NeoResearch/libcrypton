@@ -1,4 +1,4 @@
-#include <crypto/Crypto.h>
+#include <Crypto.h>
 
 // third-party includes
 #include <openssl/obj_mac.h> // for NID_secp192k1

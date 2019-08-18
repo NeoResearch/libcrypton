@@ -16,9 +16,9 @@ To build it (on linux):
 If you open `./bin/crypdev` you get a simple user terminal:
 
 ```
-===========================================
-Welcome to crypdev: a CryptoN tool for devs
-===========================================
+===============================================
+Welcome to crypdev: a lib CryptoN tool for devs
+===============================================
 Type 'exit' to finish program (or 'help')
 
 >help
@@ -27,8 +27,10 @@ crypdev command: 'help'
 'help' command options: [ ]
 existing commands are: 
 set [ curve ] [ secp256r1 ]
-gen [ keypair ]
+gen [ keypair pubkey privkey ] [ compressed uncompressed ] [ BYTES ]
 hash [ hash160 hash256 sha256 ripemd160 ] [ TEXT_OR_BYTES ]
+bytes [ reverse length ] [ TEXT_OR_BYTES ]
+rand [ BYTE_COUNT ] 
 show [ engine ]
 ```
 
@@ -62,13 +64,6 @@ CURVE SET TO 'secp256r1'
 public key (compressed format): 037c50d797720fefe9194ecd5b4ef3c25b3791abb45639aa8453d110bae08a945a
 private key: 13043155bf3e00b6e6352ffafba9f7fa96704de08c7db2fe810a92d644199258
 ```
-
->gen privkey
-crypdev command: 'gen'
-'gen' command options: [ keypair ]
-'privkey' options: [ ]
-private key: aa981a6b6abb7b84954e5a10281c0afb982c5a89386b8e264531e6f98dcbe84f
-
 
 Or even better, manually generating private key (randomly) and attached public key:
 ```

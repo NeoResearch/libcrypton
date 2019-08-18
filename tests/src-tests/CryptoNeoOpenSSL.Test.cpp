@@ -45,7 +45,7 @@ TEST(CryptoTest, Test_SignData_EmptyMessage)
 
    // creating private/public key pair (random each test)
    vbyte mypubkey;
-   vbyte myprivkey = crypto.GeneratePrivateKey(mypubkey);
+   vbyte myprivkey = crypto.GenerateKeyPair(mypubkey);
 
    // sign empty message
    vbyte sig = crypto.SignData(crypto.Sha256(msg), myprivkey, mypubkey);
@@ -60,12 +60,12 @@ TEST(CryptoTest, Test_GeneratePublicKey)
 
    // creating private/public key pair (random each test)
    vbyte mypubkey;
-   vbyte myprivkey = crypto.GeneratePrivateKey(mypubkey);
+   vbyte myprivkey = crypto.GenerateKeyPair(mypubkey);
 
    // re-generate pubkey in compressed format (= true)
    vbyte otherpub = crypto.GetPublicKeyFromPrivateKey(myprivkey, true);
 
-   // test sizes 
+   // test sizes
    EXPECT_EQ(mypubkey.size(), otherpub.size());
    // test pubkeys
    EXPECT_EQ(mypubkey, otherpub);

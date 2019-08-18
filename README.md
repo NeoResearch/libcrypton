@@ -11,7 +11,7 @@ There's an amazing tool here, called `crypdev`, specially made for crypto develo
 To build it (on linux):
 - Get submodules: `git submodule update --init --recursive` (specially gets openssl)
 - to build openssl engine: `make vendor`
-- to build `libcrypton` and `crypdev`: `make` (this will add it to `bin/crypdev`).
+- to build `libcrypton` and `crypdev`: just type `make` (this will add it to `bin/crypdev`).
 
 If you open `./bin/crypdev` you get a simple user terminal:
 

@@ -54,3 +54,19 @@ TEST(CryptoTest, Test_SignData_EmptyMessage)
    EXPECT_EQ(crypto.VerifySignature(msg, sig, mypubkey), 1);
 }
 
+TEST(CryptoTest, Test_GeneratePublicKey)
+{
+   Crypto crypto;
+
+   // creating private/public key pair (random each test)
+   vbyte mypubkey;
+   vbyte myprivkey = crypto.GeneratePrivateKey(mypubkey);
+
+   // re-generate pubkey in compressed format (= true)
+   vbyte otherpub = crypto.GetPublicKeyFromPrivateKey(myprivkey, true);
+
+   // test sizes 
+   EXPECT_EQ(mypubkey.size(), otherpub.size());
+   // test pubkeys
+   EXPECT_EQ(mypubkey, otherpub);
+}

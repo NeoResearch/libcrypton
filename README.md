@@ -12,7 +12,10 @@ This project is part of the [neopt](https://github.com/neoresearch/neopt) macro 
 
 There's an amazing tool here, called `crypdev`, specially made for crypto developers.
 
-To build it, just type `make` (this will add it to `bin/crypdev`).
+To build it:
+- Get submodules: `git submodule update --init --recursive` (specially gets openssl)
+- build `openssl` engine: `mkdir -p libopenssl/build && cd libopenssl/build && cmake .. && make`
+- go back to root, and type `cd ../../ && make` (this will add it to `bin/crypdev`).
 
 If you open `./bin/crypdev` you get a simple user terminal:
 

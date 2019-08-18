@@ -102,6 +102,8 @@ public:
 
    // Sha3 (optional) - implemented via openssl... keccak (older) or NIST SHA-3?
    vbyte Sha3NIST(const vbyte& message) const;
+
+   ///vbyte RandBytes(int count); // generate random bytes, used for private applications
 };
 }
 

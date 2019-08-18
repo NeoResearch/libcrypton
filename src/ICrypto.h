@@ -6,6 +6,12 @@
 // system includes
 #include <vector>
 
+// only for random
+#include <algorithm> //std:: generate
+#include <functional>
+#include <limits.h> // CHAR
+#include <random>
+
 // core includes
 //#include <system/types.h>
 
@@ -82,6 +88,22 @@ public:
    virtual string GetEngine() const
    {
       return "unknown";
+   }
+
+   // generate random bytes, used for private applications
+   virtual vbyte RandBytes(int count)
+   {
+      int MAX = 1024 * 10; // 10KiB MAX
+      if ((count < 0) || (count > MAX))
+         return vbyte(0);
+      vbyte vbytes(count, 0x00);
+      using random_bytes_engine = std::independent_bits_engine<std::default_random_engine, CHAR_BIT, unsigned char>;
+      std::random_device rd;
+      random_bytes_engine rbe; //(rd) ?
+      if (rd.entropy() == 0)   // no entropy
+         return vbyte(0);
+      std::generate(std::begin(vbytes), std::end(vbytes), std::ref(rbe));
+      return vbytes;
    }
 };
 }

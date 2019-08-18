@@ -13,6 +13,7 @@
 #include <iostream>
 
 using namespace libcrypton;
+using namespace std;
 
 // first thing, declare private static variable _crypto
 ICrypto* Crypto::_crypto = nullptr;
@@ -205,7 +206,7 @@ const byte EMPTY_RIPEMD160[] = {
    0x31
 };
 
-string
+std::string
 Crypto::GetEngine() const
 {
    return "openssl";

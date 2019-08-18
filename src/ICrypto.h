@@ -15,7 +15,7 @@
 // core includes
 //#include <system/types.h>
 
-using namespace std; // TODO: remove
+//using namespace std; // TODO: remove
 
 #define NEOPT_EXCEPTION(str)                               \
    {                                                       \
@@ -85,7 +85,7 @@ public:
    }
 
    // string for implementation engine. expected values: "openssl", "crypto++", "unknown"
-   virtual string GetEngine() const
+   virtual std::string GetEngine() const
    {
       return "unknown";
    }

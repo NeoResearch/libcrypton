@@ -46,7 +46,7 @@ public:
    }
 
    // string for implementation engine. expected values: "openssl", "crypto++", "unknown"
-   virtual string GetEngine() const override;
+   virtual std::string GetEngine() const override;
 
    vbyte Hash160(const vbyte& message) const;
 

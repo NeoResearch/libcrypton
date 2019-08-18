@@ -13,7 +13,7 @@
 
 using namespace std; // TODO: avoid!
 
-namespace neopt {
+namespace libcrypton {
 
 // crypto helper class
 class chelper

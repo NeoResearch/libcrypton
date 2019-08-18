@@ -4,7 +4,7 @@
 
 #include<iostream>
 
-using namespace neopt;
+using namespace libcrypton;
 
 void
 lComputeKeccak(const unsigned char *message, size_t message_len, vbyte& digest);

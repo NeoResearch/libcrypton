@@ -4,19 +4,20 @@
 // WARNING: do not include .hpp here, or things may break!
 
 // system includes
-#include<vector>
+#include <vector>
 
 // core includes
 //#include <system/types.h>
 
 using namespace std; // TODO: remove
 
-#define NEOPT_EXCEPTION(str)                          \
-   {                                                  \
-      printf("neopt error(%s): %s\n", __func__, str); \
-      exit(1);                                        \
+#define NEOPT_EXCEPTION(str)                               \
+   {                                                       \
+      printf("libcrypton error(%s): %s\n", __func__, str); \
+      exit(1);                                             \
    }
 
+namespace libcrypton {
 
 typedef unsigned char byte;
 
@@ -25,8 +26,6 @@ typedef std::vector<byte> vbyte;
 typedef short int16;
 
 typedef int int32;
-
-namespace neopt {
 
 class ICrypto
 {
@@ -78,8 +77,13 @@ public:
       // TODO: if (!EC_POINT_mul(ecdsa->group, pub_key, priv_key, NULL, NULL, ctx))
       return vbyte(0);
    }
-};
 
+   // string for implementation engine. expected values: "openssl", "crypto++", "unknown"
+   virtual string GetEngine() const
+   {
+      return "unknown";
+   }
+};
 }
 
 #endif

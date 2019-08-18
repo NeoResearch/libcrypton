@@ -22,7 +22,7 @@
 // core includes
 #include "ICrypto.h"
 
-namespace neopt {
+namespace libcrypton {
 
 // cryptography for Neo
 class Crypto : public ICrypto
@@ -44,6 +44,9 @@ public:
          delete _crypto;
       _crypto = nullptr;
    }
+
+   // string for implementation engine. expected values: "openssl", "crypto++", "unknown"
+   virtual string GetEngine() const override;
 
    vbyte Hash160(const vbyte& message) const;
 
@@ -100,7 +103,6 @@ public:
    // Sha3 (optional) - implemented via openssl... keccak (older) or NIST SHA-3?
    vbyte Sha3NIST(const vbyte& message) const;
 };
-
 }
 
 #endif

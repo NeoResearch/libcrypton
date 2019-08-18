@@ -6,7 +6,7 @@
 //#include<system/vhelper.hpp>
 //#include<system/shelper.h>
 
-using namespace neopt;
+using namespace libcrypton;
 
 TEST(CryptoTest, Test_Hash160_Empty)
 {

@@ -22,7 +22,7 @@
 // core includes
 #include <ICrypto.h>
 
-namespace neopt {
+namespace libcrypton {
 
 class CryptoExtra
 {

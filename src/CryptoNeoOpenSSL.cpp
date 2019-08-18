@@ -10,9 +10,9 @@
 
 #include <openssl/evp.h> // sha-3 (unknown if keccak or post-keccak / NIST SHA-3)
 
-#include<iostream>
+#include <iostream>
 
-using namespace neopt;
+using namespace libcrypton;
 
 // first thing, declare private static variable _crypto
 ICrypto* Crypto::_crypto = nullptr;
@@ -45,11 +45,10 @@ void
 lComputeRIPEMD160(const byte* data, int32 length, byte* output);
 
 void
-lComputeSHA3OpenSSL(const unsigned char *message, size_t message_len, unsigned char **digest, unsigned int *digest_len);
+lComputeSHA3OpenSSL(const unsigned char* message, size_t message_len, unsigned char** digest, unsigned int* digest_len);
 
 void
-lComputeKeccak(const unsigned char *message, size_t message_len, vbyte& digest);
-
+lComputeKeccak(const unsigned char* message, size_t message_len, vbyte& digest);
 
 // -1=ERROR , 0= False , 1=True
 static int16
@@ -206,6 +205,12 @@ const byte EMPTY_RIPEMD160[] = {
    0x31
 };
 
+string
+Crypto::GetEngine() const
+{
+   return "openssl";
+}
+
 vbyte
 Crypto::Hash160(const vbyte& message) const
 {
@@ -239,16 +244,16 @@ Crypto::Sha256(const vbyte& message) const
    return voutput;
 }
 
-vbyte Crypto::Sha3NIST(const vbyte& message) const
+vbyte
+Crypto::Sha3NIST(const vbyte& message) const
 {
    //lComputeSHA3(message.data(), message.size(), voutput.data());
-   unsigned char *digest;
+   unsigned char* digest;
    unsigned int digest_len;
    lComputeSHA3OpenSSL(message.data(), message.size(), &digest, &digest_len);
-   vbyte voutput(digest, digest+digest_len);
+   vbyte voutput(digest, digest + digest_len);
    return voutput;
 }
-
 
 vbyte
 Crypto::RIPEMD160(const vbyte& message) const
@@ -656,35 +661,34 @@ lComputeSHA256(const byte* data, int32 length, byte* output)
    OPENSSL_cleanse(&c, sizeof(c));
 }
 
-void handleErrors()
+void
+handleErrors()
 {
    NEOPT_EXCEPTION("ERROR IN SHA3!");
 }
 
 void
-lComputeSHA3OpenSSL(const unsigned char *message, size_t message_len, unsigned char **digest, unsigned int *digest_len)
+lComputeSHA3OpenSSL(const unsigned char* message, size_t message_len, unsigned char** digest, unsigned int* digest_len)
 {
-  	EVP_MD_CTX *mdctx;
+   EVP_MD_CTX* mdctx;
 
-	if((mdctx = EVP_MD_CTX_create()) == NULL)
-		handleErrors();
+   if ((mdctx = EVP_MD_CTX_create()) == NULL)
+      handleErrors();
 
-	if(1 != EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL))
-		handleErrors();
+   if (1 != EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL))
+      handleErrors();
 
-	if(1 != EVP_DigestUpdate(mdctx, message, message_len))
-		handleErrors();
+   if (1 != EVP_DigestUpdate(mdctx, message, message_len))
+      handleErrors();
 
-	if((*digest = (unsigned char *)OPENSSL_malloc(EVP_MD_size(EVP_sha3_256()))) == NULL)
-		handleErrors();
+   if ((*digest = (unsigned char*)OPENSSL_malloc(EVP_MD_size(EVP_sha3_256()))) == NULL)
+      handleErrors();
 
-	if(1 != EVP_DigestFinal_ex(mdctx, *digest, digest_len))
-		handleErrors();
+   if (1 != EVP_DigestFinal_ex(mdctx, *digest, digest_len))
+      handleErrors();
 
-	EVP_MD_CTX_destroy(mdctx);
+   EVP_MD_CTX_destroy(mdctx);
 }
-
-
 
 void
 lComputeSHA1(byte* data, int32 length, byte* output)

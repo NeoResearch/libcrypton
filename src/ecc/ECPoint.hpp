@@ -9,7 +9,7 @@
 
 using namespace std; // TODO: do not use that in the future... prefer std::vector instead
 
-namespace neopt
+namespace libcrypton
 {
 
 class ECPoint

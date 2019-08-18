@@ -44,6 +44,14 @@ Or hashing byte `0x00`:
 hash: 6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d
 ```
 
+Reversing and counting bytes:
+```
+>bytes reverse 0x010203
+reversed bytes: 030201
+>bytes length 0x010203
+length: 3
+```
+
 Other nice example is generating a random keypair for elliptic curve `secp256r1`:
 
 ```

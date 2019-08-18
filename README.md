@@ -17,9 +17,9 @@ To build it, just type `make` (this will add it to `bin/crypdev`).
 If you open `./bin/crypdev` you get a simple user terminal:
 
 ```
-==============================================
-Welcome to crypdev: a libcrypton tool for devs
-==============================================
+===========================================
+Welcome to crypdev: a CryptoN tool for devs
+===========================================
 Type 'exit' to finish program (or 'help')
 
 >help

@@ -243,9 +243,9 @@ using namespace libcrypton;
 int
 main()
 {
-   cout << "==============================================" << endl;
-   cout << "Welcome to crypdev: a libcrypton tool for devs" << endl;
-   cout << "==============================================" << endl;
+   cout << "===========================================" << endl;
+   cout << "Welcome to crypdev: a CryptoN tool for devs" << endl;
+   cout << "===========================================" << endl;
    cout << "Type 'exit' to finish program (or 'help')" << endl;
 
    cout << endl

@@ -51,9 +51,11 @@ execHelp()
    cout << "existing commands are: " << endl;
 
    cout << "set [ curve ] [ secp256r1 ]" << endl;
-   cout << "gen [ keypair pubkey privkey ] [ compressed uncompressed ] [ BYTES ]" << endl;
+   cout << "gen [ keypair pubkey privkey ] [ compressed uncompressed ] [ PRIVATE_KEY ]" << endl;
    cout << "hash [ hash160 hash256 sha256 ripemd160 ] [ TEXT_OR_BYTES ]" << endl;
    cout << "bytes [ reverse length ] [ TEXT_OR_BYTES ]" << endl;
+   cout << "sign [ PRIVATE_KEY ] [ MESSAGE ] " << endl;
+   cout << "verify [ PUBLIC_KEY ] [ MESSAGE ] [ SIGNATURE ] " << endl;
    cout << "rand [ BYTE_COUNT ] " << endl;
    cout << "show [ engine ]" << endl;
 
@@ -250,6 +252,74 @@ execBytes()
 }
 
 bool
+execSign()
+{
+   cout << "'sign' command options: [ PRIVATE_KEY ] [ MESSAGE ]" << endl;
+   string sprivkey;
+   cin >> sprivkey;
+   vbyte privkeybytes = parseTextBytes(sprivkey);
+
+   if (privkeybytes.size() != 32) {
+      std::cerr << "ERROR: private key should have 32 bytes for secp256r1" << std::endl;
+   }
+
+   string smessage;
+   cin >> smessage;
+   vbyte msgbytes = parseTextBytes(smessage);
+
+   Crypto crypto;
+
+   vbyte hashbytes = crypto.Sha256(msgbytes);
+
+   if (hashbytes.size() != 32) {
+      std::cerr << "ERROR: hash should have 32 bytes for secp256r1" << std::endl;
+   }
+
+   // get compressed pubkey
+   vbyte mypubkey = crypto.GetPublicKeyFromPrivateKey(privkeybytes, true);
+
+   vbyte sig = crypto.SignData(hashbytes, privkeybytes, mypubkey);
+
+   cout << "signature: " << chelper::ToHexString(sig) << endl;
+   return true;
+}
+
+bool
+execVerify()
+{
+   cout << "'verify' command options: [ PUBLIC_KEY ] [ MESSAGE ] [ SIGNATURE ]" << endl;
+   string spubkey;
+   cin >> spubkey;
+   vbyte pubkeybytes = parseTextBytes(spubkey);
+
+   if (pubkeybytes.size() != 33) {
+      std::cerr << "ERROR: public key (compressed) should have 33 bytes for secp256r1" << std::endl;
+      return false;
+   }
+
+   string smessage;
+   cin >> smessage;
+   vbyte msgbytes = parseTextBytes(smessage);
+
+   string ssig;
+   cin >> ssig;
+   vbyte sigbytes = parseTextBytes(ssig);
+
+   if (sigbytes.size() != 64) {
+      std::cerr << "ERROR: signature should have 64 bytes for secp256r1" << std::endl;
+      return false;
+   }
+
+   Crypto crypto;
+
+   bool b = crypto.VerifySignature(msgbytes, sigbytes, pubkeybytes);
+
+   cout << "verification result: " << b << endl;
+
+   return true;
+}
+
+bool
 execRand()
 {
    cout << "'rand' command options: [ BYTE_COUNT ]" << endl;
@@ -284,6 +354,12 @@ execute(string command)
 
    if (command == "rand")
       return execRand();
+
+   if (command == "sign")
+      return execSign();
+
+   if (command == "verify")
+      return execVerify();
 
    if (command == "show")
       return execShow();

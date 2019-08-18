@@ -8,7 +8,57 @@ This project is part of the [neopt](https://github.com/neoresearch/neopt) macro 
 
 * port code from neopt
 
-### Why chosing C/C++ language for that?
+## How to Test
+
+There's an amazing tool here, called `crypdev`, specially made for crypto developers.
+
+To build it, just type `make` (this will add it to `bin/crypdev`).
+
+If you open `./bin/crypdev` you get a simple user terminal:
+
+```
+==============================================
+Welcome to crypdev: a libcrypton tool for devs
+==============================================
+Type 'exit' to finish program (or 'help')
+
+>help
+crypdev command: 'help'
+
+'help' command options: [ ]
+existing commands are: 
+set [ curve ] [ secp256r1 ]
+gen [ keypair ]
+hash [ hash160 hash256 sha256 ripemd160 ] [ TEXT_OR_BYTES ]
+show [ engine ]
+```
+
+One simple example is, hashing an empty string on SHA256:
+
+```
+>hash sha256 ""
+hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+```
+
+Other nice example is generating a random keypair for elliptic curve `secp256r1`:
+
+```
+>set curve secp256r1
+CURVE SET TO 'secp256r1'
+
+>gen keypair
+public key (compressed format): 037c50d797720fefe9194ecd5b4ef3c25b3791abb45639aa8453d110bae08a945a
+private key: 13043155bf3e00b6e6352ffafba9f7fa96704de08c7db2fe810a92d644199258
+```
+
+Since `libcrypton` can be implemented in multiple engines, you can check underlying engine:
+
+```
+>show engine
+libcrypton engine: openssl
+```
+
+## Why chosing C/C++ language for that?
 Existing frameworks use high-level languages that may not be suitable for very lightweight architectures,
 such as microcontrollers with very limited computing capabilities.
 

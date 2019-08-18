@@ -6,6 +6,7 @@
 #include <iomanip> // fill zero for hex
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 // libcrypton includes
 #include "Crypto.h"
@@ -95,6 +96,7 @@ execHelp()
    cout << "set [ curve ] [ secp256r1 ]" << endl;
    cout << "gen [ keypair ]" << endl;
    cout << "hash [ hash160 hash256 sha256 ripemd160 ] [ TEXT_OR_BYTES ]" << endl;
+   cout << "bytes [ reverse length ] [ TEXT_OR_BYTES ]" << endl;
    cout << "show [ engine ]" << endl;
 
    return true;
@@ -216,6 +218,35 @@ execGen()
 }
 
 bool
+execBytes()
+{
+   cout << "'bytes' command options: [ reverse length ]" << endl;
+   string type;
+   cin >> type;
+
+   if (type == "reverse") {
+      cout << "'reverse' options: [ TEXT_OR_BYTES ]" << endl;
+      string tbytes;
+      cin >> tbytes;
+      vbyte bytes = parseTextBytes(tbytes);
+      std::reverse(std::begin(bytes), std::end(bytes));
+      cout << "reversed bytes: " << ToHexString(bytes) << endl;
+      return true;
+   }
+
+   if (type == "length") {
+      cout << "'length' options: [ TEXT_OR_BYTES ]" << endl;
+      string tbytes;
+      cin >> tbytes;
+      vbyte bytes = parseTextBytes(tbytes);
+      cout << "length: " << bytes.size() << endl;
+      return true;
+   }
+
+   return false;
+}
+
+bool
 execute(string command)
 {
    if (command == "set")
@@ -226,6 +257,9 @@ execute(string command)
 
    if (command == "hash")
       return execHash();
+
+   if (command == "bytes") // byte operations
+      return execBytes();
 
    if (command == "show")
       return execShow();

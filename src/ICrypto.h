@@ -14,24 +14,11 @@
 
 // core includes
 //#include <system/types.h>
+#include "chelper.hpp"
 
 //using namespace std; // TODO: remove
 
-#define NEOPT_EXCEPTION(str)                               \
-   {                                                       \
-      printf("libcrypton error(%s): %s\n", __func__, str); \
-      exit(1);                                             \
-   }
-
 namespace libcrypton {
-
-typedef unsigned char byte;
-
-typedef std::vector<byte> vbyte;
-
-typedef short int16;
-
-typedef int int32;
 
 class ICrypto
 {
@@ -78,7 +65,7 @@ public:
       return vbyte(0);
    }
 
-   virtual vbyte GetPublicKeyFromPrivateKey(const vbyte& priv) const
+   virtual vbyte GetPublicKeyFromPrivateKey(const vbyte& priv, bool compressed) const
    {
       // TODO: if (!EC_POINT_mul(ecdsa->group, pub_key, priv_key, NULL, NULL, ctx))
       return vbyte(0);
@@ -106,6 +93,7 @@ public:
       //if (rd.entropy() == 0)   // no entropy or always zero (?) - looks like a bug in gcc...
       //   return vbyte(0);
 
+      // seed random_bytes_engine with random_device (otherwise it becomes deterministic...)
       random_bytes_engine rbe(rd());
       std::generate(std::begin(vbytes), std::end(vbytes), std::ref(rbe));
       return vbytes;

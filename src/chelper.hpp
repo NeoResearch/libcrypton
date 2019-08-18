@@ -4,34 +4,102 @@
 // Crypto Helper: chelper
 
 // system
+#include <algorithm> //std:: generate
+#include <functional>
+#include <iomanip>
+#include <limits.h> // CHAR
+#include <random>
 #include <sstream>
 #include <vector>
 
 // neo core
-#include <numbers/UInt160.hpp>
-#include <system/types.h>
+//#include <numbers/UInt160.hpp>
+//#include <system/types.h>
 
-using namespace std; // TODO: avoid!
+//using namespace std; // TODO: avoid!
 
 namespace libcrypton {
+
+#define NEOPT_EXCEPTION(str)                               \
+   {                                                       \
+      printf("libcrypton error(%s): %s\n", __func__, str); \
+      exit(1);                                             \
+   }
+
+typedef unsigned char byte;
+
+typedef std::vector<byte> vbyte;
+
+typedef short int16;
+
+typedef int int32;
 
 // crypto helper class
 class chelper
 {
 public:
+   static std::string
+   ToHexString(const vbyte& v, bool cs = false)
+   {
+      //std::cout << "ToHexString!!!!" << std::endl;
+      std::stringstream ss;
+      // TODO: check if format is this
+      for (unsigned i = 0; i < v.size(); i++) // TODO: use foreach
+      {
+         if (cs)
+            ss << std::uppercase;
+         ss << std::setfill('0') << std::setw(2) << std::hex << (int)v[i];
+      }
+      //std::cout << "ToHexString!!!! RESULT = " << ss.str() << std::endl;
+
+      return ss.str();
+   }
+
+   static std::string
+   ToHexString(const byte& b, bool cs = false)
+   {
+      return ToHexString(vbyte(1, b), cs);
+   }
+
+   static std::string
+   ASCIIToHexString(const std::string& chars)
+   {
+      std::stringstream ss;
+      for (unsigned i = 0; i < chars.size(); i++)
+         ss << std::setfill('0') << std::setw(2) << std::hex << int((byte)chars[i]);
+      return ss.str();
+   }
+
+   static vbyte
+   HexToBytes(const std::string& hex)
+   {
+      // TODO: implement (begin 0x)
+      //NEOPT_EXCEPTION("Not implemented yet: HexToBytes");
+      vbyte bytes(hex.length() / 2);
+
+      for (uint i = 0; i < hex.length(); i += 2) {
+         std::string byteString = hex.substr(i, 2);
+         byte b = (byte)strtol(byteString.c_str(), NULL, 16);
+         bytes[i / 2] = b;
+      }
+      return bytes;
+   }
+
+   /*
    static UInt160 ToScriptHash(const vbyte& v)
    {
       NEOPT_EXCEPTION("Not implemented: ToScriptHash");
       return UInt160();
    }
+*/
 
-   static string Base58CheckEncode(const vbyte& data)
+   static std::string Base58CheckEncode(const vbyte& data)
    {
       NEOPT_EXCEPTION("Not implemented: Base58CheckEncode");
       return "";
    }
 
-   static vbyte Base58CheckDecode(string address)
+   static vbyte Base58CheckDecode(std::string address)
    {
       NEOPT_EXCEPTION("Not implemented: Base58CheckDecode");
       return vbyte(0);
@@ -39,7 +107,6 @@ public:
 };
 
 // TODO: define all operators here that are necessary
-
 }
 
 #endif

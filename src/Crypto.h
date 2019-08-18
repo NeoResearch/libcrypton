@@ -64,6 +64,8 @@ public:
    {
       return SignData(Sha256(message), privkey, pubkey);
    }
+
+   vbyte GetPublicKeyFromPrivateKey(const vbyte& priv, bool compressed) const;
    /*
    public byte[] Sign(byte[] message, byte[] prikey, byte[] pubkey)
 {

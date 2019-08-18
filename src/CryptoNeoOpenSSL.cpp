@@ -13,7 +13,7 @@
 #include <iostream>
 
 using namespace libcrypton;
-using namespace std;
+//using namespace std; // do not use
 
 // first thing, declare private static variable _crypto
 ICrypto* Crypto::_crypto = nullptr;
@@ -587,6 +587,53 @@ Crypto::GeneratePrivateKey(vbyte& vpubkey) const
    EC_GROUP_free(ecgroup);
 
    return std::move(vpriv);
+}
+
+vbyte
+Crypto::GetPublicKeyFromPrivateKey(const vbyte& priv, bool compressed) const
+{
+   // ctx is optional buffer
+   BN_CTX* ctx = BN_CTX_new(); 
+   // 'res' will receive private key value
+   BIGNUM* res = BN_new();
+   // convert 'priv' to hexstring (uppercase = true)
+   std::string spriv = chelper::ToHexString(priv, true);
+   // create big integer from hexstring on 'priv'
+   int r = BN_hex2bn(&res, spriv.c_str());
+   // define working curve (secp256r1)
+   EC_KEY* eckey = EC_KEY_new_by_curve_name(_curve);
+   const EC_GROUP* group = EC_KEY_get0_group(eckey);
+   EC_POINT* pub_key = EC_POINT_new(group);
+
+   EC_KEY_set_private_key(eckey, res);
+
+   if (!EC_POINT_mul(group, pub_key, res, NULL, NULL, ctx))
+   {
+      NEOPT_EXCEPTION("Error at EC_POINT_mul.\n");
+      return vbyte(0);
+   }
+
+   EC_KEY_set_public_key(eckey, pub_key);
+
+   char* cc;
+
+   if(compressed) 
+      cc = EC_POINT_point2hex(group, pub_key, POINT_CONVERSION_COMPRESSED, ctx); // point_conversion_form_t
+   else
+      cc = EC_POINT_point2hex(group, pub_key, POINT_CONVERSION_UNCOMPRESSED, ctx); // point_conversion_form_t
+
+   // hex to bytes
+   std::string str(cc);
+
+   vbyte vpubkey = chelper::HexToBytes(str);
+
+   BN_CTX_free(ctx);
+
+   OPENSSL_free(cc);
+
+   EC_KEY_free(eckey);
+
+   return std::move(vpubkey);
 }
 
 void

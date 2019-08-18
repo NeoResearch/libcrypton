@@ -97,11 +97,16 @@ public:
       if ((count < 0) || (count > MAX))
          return vbyte(0);
       vbyte vbytes(count, 0x00);
+
+      // defining an independent bit engine
       using random_bytes_engine = std::independent_bits_engine<std::default_random_engine, CHAR_BIT, unsigned char>;
+
+      // default random to seed it (perhaps using /dev/random?)
       std::random_device rd;
-      random_bytes_engine rbe; //(rd) ?
-      if (rd.entropy() == 0)   // no entropy
-         return vbyte(0);
+      //if (rd.entropy() == 0)   // no entropy or always zero (?) - looks like a bug in gcc...
+      //   return vbyte(0);
+
+      random_bytes_engine rbe(rd());
       std::generate(std::begin(vbytes), std::end(vbytes), std::ref(rbe));
       return vbytes;
    }

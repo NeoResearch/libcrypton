@@ -189,6 +189,12 @@ execGen()
       cin >> tbytes;
       vbyte privkey = parseTextBytes(tbytes);
 
+      if (privkey.size() != 32) // secp256r1
+      {
+         cerr << "ERROR: expected private key of size 32 bytes for secp256r1" << endl;
+         return false;
+      }
+
       Crypto crypto;
 
       // creating private/public key pair (random each test)
@@ -308,4 +314,3 @@ main()
 
    return 0;
 }
-

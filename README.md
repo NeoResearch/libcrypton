@@ -33,11 +33,16 @@ hash [ hash160 hash256 sha256 ripemd160 ] [ TEXT_OR_BYTES ]
 show [ engine ]
 ```
 
-One simple example is, hashing an empty string on SHA256:
+One simple example is, hashing an empty string on SHA256 (or other hashes: `hash160`,`hash256`,`ripemd160`):
 
 ```
 >hash sha256 ""
 hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+```
+Or hashing byte `0x00`:
+```
+>hash sha256 0x00
+hash: 6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d
 ```
 
 Other nice example is generating a random keypair for elliptic curve `secp256r1`:

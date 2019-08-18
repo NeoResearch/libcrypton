@@ -51,7 +51,7 @@ execHelp()
    cout << "existing commands are: " << endl;
 
    cout << "set [ curve ] [ secp256r1 ]" << endl;
-   cout << "gen [ keypair pubkey ] [ compressed uncompressed ] [ BYTES ]" << endl;
+   cout << "gen [ keypair pubkey privkey ] [ compressed uncompressed ] [ BYTES ]" << endl;
    cout << "hash [ hash160 hash256 sha256 ripemd160 ] [ TEXT_OR_BYTES ]" << endl;
    cout << "bytes [ reverse length ] [ TEXT_OR_BYTES ]" << endl;
    cout << "rand [ BYTE_COUNT ] " << endl;
@@ -201,6 +201,18 @@ execGen()
       vbyte mypubkey = crypto.GetPublicKeyFromPrivateKey(privkey, compressed);
 
       cout << "public key: " << chelper::ToHexString(mypubkey) << endl;
+
+      return true;
+   }
+
+   if (type == "privkey") {
+      cout << "'privkey' options: [ ]" << endl;
+
+      Crypto crypto;
+
+      vbyte privkey = crypto.RandBytes(32); // secp256r1
+
+      cout << "private key: " << chelper::ToHexString(privkey) << endl;
 
       return true;
    }

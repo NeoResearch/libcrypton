@@ -58,9 +58,13 @@ public:
    // proposed methods
    // -----------------
 
-   // this definition is mileading, vpubkey is an output parameter...
-   // this method will be changed soon, to return a pair or ECPoint (TODO: think about it)
-   virtual vbyte GeneratePrivateKey(vbyte& vpubkey) const
+   virtual vbyte GeneratePrivateKey()
+   {
+      return RandBytes(32);
+   }
+
+   // returns private and updates public (TODO: rethink method)
+   virtual vbyte GenerateKeyPair(vbyte& vpubkey) const
    {
       return vbyte(0);
    }

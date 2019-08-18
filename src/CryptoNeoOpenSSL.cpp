@@ -492,7 +492,7 @@ lVerifySignature(
 
 // generates private key and updates parameter vpubkey (TODO: update function format)
 vbyte
-Crypto::GeneratePrivateKey(vbyte& vpubkey) const
+Crypto::GenerateKeyPair(vbyte& vpubkey) const
 {
    //printf("generating priv/pub key\n");
    EC_KEY* eckey = EC_KEY_new();

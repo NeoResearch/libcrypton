@@ -165,7 +165,7 @@ execGen()
 
       // creating private/public key pair (random each test)
       vbyte mypubkey;
-      vbyte myprivkey = crypto.GeneratePrivateKey(mypubkey);
+      vbyte myprivkey = crypto.GenerateKeyPair(mypubkey);
 
       cout << "public key (compressed format): " << chelper::ToHexString(mypubkey) << endl;
       cout << "private key: " << chelper::ToHexString(myprivkey) << endl;

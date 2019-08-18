@@ -88,7 +88,7 @@ public:
    // TODO: receive pubkey or already ECPoint(X,Y) ?
    vbyte SignData(const vbyte& digest, const vbyte& prikey, const vbyte& pubkey) const;
 
-   virtual vbyte GeneratePrivateKey(vbyte& vpubkey) const;
+   virtual vbyte GenerateKeyPair(vbyte& vpubkey) const;
 
    // manually added
    static vbyte FromHexString(std::string hex)

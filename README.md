@@ -28,7 +28,7 @@ crypdev command: 'help'
 existing commands are: 
 set [ ecc hash ] [ secp256r1 | sha256 ]
 gen [ ECC_TYPE ] [ keypair pubkey privkey ] [ compressed uncompressed ] [ PRIVATE_KEY ]
-hash [ hash160 hash256 sha256 ripemd160 ] [ TEXT_OR_BYTES ]
+hash [ hash160 hash256 sha256 ripemd160 none ] [ TEXT_OR_BYTES ]
 bytes [ reverse length ] [ TEXT_OR_BYTES ]
 sign [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ MESSAGE ] 
 verify [ ECC_TYPE ] [ PUBLIC_KEY ] [ HASH_TYPE ] [ MESSAGE ] [ SIGNATURE ] 

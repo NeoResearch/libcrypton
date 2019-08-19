@@ -53,7 +53,7 @@ execHelp()
 
    cout << "set [ ecc hash ] [ secp256r1 | sha256 ]" << endl;
    cout << "gen [ ECC_TYPE ] [ keypair pubkey privkey ] [ compressed uncompressed ] [ PRIVATE_KEY ]" << endl;
-   cout << "hash [ hash160 hash256 sha256 ripemd160 ] [ TEXT_OR_BYTES ]" << endl;
+   cout << "hash [ hash160 hash256 sha256 ripemd160 none ] [ TEXT_OR_BYTES ]" << endl;
    cout << "bytes [ reverse length ] [ TEXT_OR_BYTES ]" << endl;
    cout << "sign [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ MESSAGE ] " << endl;
    cout << "verify [ ECC_TYPE ] [ PUBLIC_KEY ] [ HASH_TYPE ] [ MESSAGE ] [ SIGNATURE ] " << endl;

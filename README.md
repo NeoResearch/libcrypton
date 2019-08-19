@@ -123,7 +123,7 @@ a313e92ddb08a706b23a
 Some commands often require reading until end of line, so it's good to protect by adding a line break before semi-colon:
 
 ```
-./bin/crypdev -c "rand 5 ; hash none 0x0001 `echo $'\n'$';'` rand 10 "
+./bin/crypdev -c "rand 5 ; hash none 0x0001 `echo $'\n;'` rand 10"
 1e52f7557c
 0001
 afeaec7e0dac88ecfc51

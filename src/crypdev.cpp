@@ -29,6 +29,7 @@ parseTextBytes(string input)
    if (input[0] == '"') {
       if (input[input.length() - 1] != '\"') {
          std::cerr << "failed to parse string (spaces not allowed)" << std::endl;
+         return vbyte(0);
       }
 
       input = input.substr(1, input.length() - 2);
@@ -62,8 +63,8 @@ execHelp()
    cout << "gen [ ECC_TYPE ] [ keypair pubkey privkey ] [ compressed uncompressed ] [ PRIVATE_KEY ]" << endl;
    cout << "hash [ hash160 hash256 sha256 ripemd160 none ] [ TEXT_OR_BYTES ]" << endl;
    cout << "bytes [ reverse length ] [ TEXT_OR_BYTES ]" << endl;
-   cout << "sign [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ BYTES ] " << endl;
-   cout << "verify [ ECC_TYPE ] [ PUBLIC_KEY ] [ HASH_TYPE ] [ BYTES ] [ SIGNATURE ] " << endl;
+   cout << "sign [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ TEXT_OR_BYTES ] " << endl;
+   cout << "verify [ ECC_TYPE ] [ PUBLIC_KEY ] [ SIGNATURE ] [ HASH_TYPE ] [ TEXT_OR_BYTES ]  " << endl;
    cout << "rand [ BYTE_COUNT ] " << endl;
    cout << "show [ engine ]" << endl;
 
@@ -118,6 +119,8 @@ execHash()
       string tbytes;
       std::getline(cin, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
+      if (bytes.size() == 0) // check if parsed correctly
+         return false;
       vbyte hash = crypto.Hash160(bytes);
       cout << "hash: " << chelper::ToHexString(hash) << endl;
       return true;
@@ -128,6 +131,8 @@ execHash()
       string tbytes;
       std::getline(cin, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
+      if (bytes.size() == 0) // check if parsed correctly
+         return false;
       vbyte hash = crypto.Hash256(bytes);
       cout << "hash: " << chelper::ToHexString(hash) << endl;
       return true;
@@ -138,6 +143,8 @@ execHash()
       string tbytes;
       std::getline(cin, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
+      if (bytes.size() == 0) // check if parsed correctly
+         return false;
       vbyte hash = crypto.Sha256(bytes);
       cout << "hash: " << chelper::ToHexString(hash) << endl;
       return true;
@@ -148,6 +155,8 @@ execHash()
       string tbytes;
       std::getline(cin, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
+      if (bytes.size() == 0) // check if parsed correctly
+         return false;
       vbyte hash = crypto.RIPEMD160(bytes);
       cout << "hash: " << chelper::ToHexString(hash) << endl;
       return true;
@@ -158,6 +167,8 @@ execHash()
       string tbytes;
       std::getline(cin, tbytes);
       vbyte hash = parseTextBytes(tbytes);
+      if (hash.size() == 0) // check if parsed correctly
+         return false;
       cout << "hash: " << chelper::ToHexString(hash) << endl;
       return true;
    }
@@ -288,7 +299,7 @@ execBytes()
 bool
 execSign()
 {
-   cout << "'sign' command options: [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ BYTES ]" << endl;
+   cout << "'sign' command options: [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ TEXT_OR_BYTES ]" << endl;
 
    string ecc;
    cin >> ecc;
@@ -306,7 +317,7 @@ execSign()
    cin >> htype;
 
    string smessage;
-   cin >> smessage;
+   std::getline(cin, smessage);
    vbyte msgbytes = parseTextBytes(smessage);
 
    Crypto crypto;
@@ -337,7 +348,7 @@ execSign()
 bool
 execVerify()
 {
-   cout << "'verify' command options: [ ECC_TYPE ] [ PUBLIC_KEY ] [ HASH_TYPE ]  [ BYTES ] [ SIGNATURE ]" << endl;
+   cout << "'verify' command options: [ ECC_TYPE ] [ PUBLIC_KEY ] [ SIGNATURE ] [ HASH_TYPE ]  [ TEXT_OR_BYTES ] " << endl;
 
    string ecc;
    cin >> ecc;
@@ -352,11 +363,15 @@ execVerify()
       return false;
    }
 
+   string ssig;
+   cin >> ssig;
+   vbyte sigbytes = parseTextBytes(ssig);
+
    string htype;
    cin >> htype;
 
    string smessage;
-   cin >> smessage;
+   std::getline(cin, smessage);
    vbyte msgbytes = parseTextBytes(smessage);
 
    Crypto crypto;
@@ -364,10 +379,6 @@ execVerify()
    vbyte hashbytes;
    std::cout << "Assuming hash type = 'sha256'" << endl;
    hashbytes = msgbytes;
-
-   string ssig;
-   cin >> ssig;
-   vbyte sigbytes = parseTextBytes(ssig);
 
    if (sigbytes.size() != 64) {
       std::cerr << "ERROR: signature should have 64 bytes for secp256r1" << std::endl;

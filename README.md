@@ -109,6 +109,39 @@ Since `libcrypton` can be implemented in multiple engines, you can check underly
 libcrypton engine: openssl
 ```
 
+#### directly executing on file or command-line (silent mode)
+
+If you want to embed `crypdev` on any script, you can use command mode `-c`, separating commands by semi-colon:
+
+```
+./bin/crypdev -c "rand 5 ; rand 10 ; rand 1"
+d070440077
+a313e92ddb08a706b23a
+9b
+```
+
+Some commands often require reading until end of line, so it's good to protect by adding a line break before semi-colon:
+
+```
+./bin/crypdev -c "rand 5 ; hash none 0x0001 `echo $'\n'$';'` rand 10 "
+1e52f7557c
+0001
+afeaec7e0dac88ecfc51
+```
+
+Finally, it's even easier when reading from script file on disk (see `scriptttest.txt`):
+```
+cat scripttest.txt 
+rand 5
+hash sha256 0x0001
+rand 10
+
+./bin/crypdev -f scripttest.txt 
+b2c6db7ab4
+b413f47d13ee2fe6c845b2ee141af81de858df4ec549a58b7970bb96645bc8d2
+635c59ca7d16aab29eb6
+```
+
 ## Why chosing C/C++ language for that?
 Existing frameworks use high-level languages that may not be suitable for very lightweight architectures,
 such as microcontrollers with very limited computing capabilities.

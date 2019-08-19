@@ -57,7 +57,8 @@ bool
 execHelp(istream& is, bool verbose)
 {
    cout << endl;
-   cout << "'help' command options: [ ]" << endl;
+   if (verbose)
+      cout << "'help' command options: [ ]" << endl;
    cout << "existing commands are: " << endl;
 
    cout << "set [ ecc hash ] [ secp256r1 | sha256 ]" << endl;
@@ -326,7 +327,8 @@ execBytes(istream& is, bool verbose)
       if (verbose)
          cout << "'reverse' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      is >> tbytes;
+      std::getline(is, tbytes);
+
       vbyte bytes = parseTextBytes(tbytes);
       std::reverse(std::begin(bytes), std::end(bytes));
       if (verbose)
@@ -339,8 +341,10 @@ execBytes(istream& is, bool verbose)
    if (type == "length") {
       if (verbose)
          cout << "'length' options: [ TEXT_OR_BYTES ]" << endl;
+
       string tbytes;
-      is >> tbytes;
+      std::getline(is, tbytes);
+
       vbyte bytes = parseTextBytes(tbytes);
       if (verbose)
          cout << "length: ";
@@ -466,8 +470,9 @@ execRand(istream& is, bool verbose)
 {
    if (verbose)
       cout << "'rand' command options: [ BYTE_COUNT ]" << endl;
+
    int count;
-   cin >> count;
+   is >> count;
 
    int MAX = 1024 * 10; // 10 KiB
    if ((count < 0) || (count > MAX))
@@ -516,24 +521,20 @@ execute(string command, istream& is, bool verbose)
    return false;
 }
 
+// execute crypdev from stream... may be 'cin', file (via -f) or a passed string (via -c)
 int
 executeFromStream(istream& is, bool verbose)
 {
    if (verbose) {
-      if (verbose)
-         cout << "===============================================" << endl;
-      if (verbose)
-         cout << "Welcome to crypdev: a lib CryptoN tool for devs" << endl;
-      if (verbose)
-         cout << "===============================================" << endl;
-      if (verbose)
-         cout << "Type 'exit' to finish program (or 'help')" << endl;
+      cout << "===============================================" << endl;
+      cout << "Welcome to crypdev: a lib CryptoN tool for devs" << endl;
+      cout << "===============================================" << endl;
+      cout << "Type 'exit' to finish program (or 'help')" << endl;
    }
 
    if (verbose)
-      if (verbose)
-         cout << endl
-              << ">";
+      cout << endl
+           << ">";
 
    string command;
    is >> command;
@@ -542,30 +543,31 @@ executeFromStream(istream& is, bool verbose)
    // check exit conditions: "exit" or empty
    while ((command != "exit") && (command != "")) {
       if (verbose)
-         if (verbose)
-            cout << "crypdev command: '" << command << "'" << endl;
+         cout << "crypdev command: '" << command << "'" << endl;
 
       if (!execute(command, is, verbose)) {
-         if (verbose)
-            if (verbose)
-               cout << "ERROR: command '" << command << "' failed!" << endl;
+         cerr << "ERROR: command '" << command << "' failed!" << endl;
          if (!verbose) // will exit
             return 1;
       }
 
       // get new command
       if (verbose)
-         if (verbose)
-            cout << endl
-                 << ">";
+         cout << endl
+              << ">";
       command = "";
       is >> command;
       chelper::trim(command);
+
+      // comma-separated commands
+      while (command == ";") {
+         is >> command;
+         chelper::trim(command);
+      }
    }
 
    if (verbose)
-      if (verbose)
-         cout << "bye bye" << endl;
+      cout << "bye bye" << endl;
 
    return 0; // good
 }
@@ -578,7 +580,12 @@ int
 main(int argc, char* argv[])
 {
    if (argc == 2) {
-      std::cerr << "not enough parameters... use -f FILE or -c COMMANDS (\\n separated)" << std::endl;
+      std::string param1 = argv[1];
+      if (param1 == string("-v")) {
+         std::cout << "version libcrypton: 0.0.0" << std::endl;
+         return 0;
+      }
+      std::cerr << "not enough parameters... use -f \"FILE\" or -c \"COMMANDS;COMMANDS\" (semi-comma separated)" << std::endl;
       return 1;
    }
 
@@ -590,6 +597,7 @@ main(int argc, char* argv[])
       if (param1 == string("-f")) {
          // load from file (line by line)
          std::ifstream infile(param2);
+
          // execute from file (non-verbose)
          return executeFromStream(infile, false);
       }

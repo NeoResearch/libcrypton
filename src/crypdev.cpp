@@ -3,6 +3,7 @@
 
 // standard includes
 #include <algorithm>
+#include <fstream>
 #include <functional>
 #include <iomanip> // fill zero for hex
 #include <iostream>
@@ -33,10 +34,10 @@ parseTextBytes(string input)
       }
 
       input = input.substr(1, input.length() - 2);
-      cout << "input now is '" << input << "'" << endl;
+      //cout << "input now is '" << input << "'" << endl;
       // convert to hex
       input = chelper::ASCIIToHexString(input);
-      cout << "converted ascii to hex: '" << input << "'" << endl;
+      //cout << "converted ascii to hex: '" << input << "'" << endl;
    }
 
    // removing prefix '0x' if existing
@@ -53,7 +54,7 @@ string cryptest_curve = "secp256r1";
 string cryptest_hash = "sha256";
 
 bool
-execHelp()
+execHelp(istream& is, bool verbose)
 {
    cout << endl;
    cout << "'help' command options: [ ]" << endl;
@@ -72,18 +73,22 @@ execHelp()
 }
 
 bool
-execSet()
+execSet(istream& is, bool verbose)
 {
-   cout << "'set' command options: [ ecc hash ]" << endl;
+
+   if (verbose)
+      cout << "'set' command options: [ ecc hash ]" << endl;
    string type;
-   cin >> type;
+   is >> type;
 
    if (type == "ecc") {
-      cout << "'ecc' options: [ secp256r1 ]" << endl;
+      if (verbose)
+         cout << "'ecc' options: [ secp256r1 ]" << endl;
       string curve;
-      cin >> curve;
+      is >> curve;
       if (curve == "secp256r1") {
          cryptest_curve = curve;
+         // output
          cout << "DEFAULT ECC SET TO '" << cryptest_curve << "'" << endl;
          return true;
       }
@@ -91,11 +96,13 @@ execSet()
    }
 
    if (type == "hash") {
-      cout << "'hash' options: [ sha256 ]" << endl;
+      if (verbose)
+         cout << "'hash' options: [ sha256 ]" << endl;
       string shash;
-      cin >> shash;
+      is >> shash;
       if (shash == "sha256") {
          cryptest_hash = shash;
+         //output
          cout << "DEFAULT HASH SET TO '" << cryptest_hash << "'" << endl;
          return true;
       }
@@ -106,70 +113,91 @@ execSet()
 }
 
 bool
-execHash()
+execHash(istream& is, bool verbose)
 {
-   cout << "'hash' command options: [ hash160 hash256 sha256 ripemd160 none ]" << endl;
+   if (verbose)
+      cout << "'hash' command options: [ hash160 hash256 sha256 ripemd160 none ]" << endl;
    string type;
-   cin >> type;
+   is >> type;
 
    Crypto crypto;
 
    if (type == "hash160") {
-      cout << "'hash160' options: [ TEXT_OR_BYTES ]" << endl;
+      if (verbose)
+         cout << "'hash160' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      std::getline(cin, tbytes);
+      std::getline(is, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
       if (bytes.size() == 0) // check if parsed correctly
          return false;
       vbyte hash = crypto.Hash160(bytes);
-      cout << "hash: " << chelper::ToHexString(hash) << endl;
+      if (verbose)
+         cout << "hash: ";
+      // output
+      cout << chelper::ToHexString(hash) << endl;
       return true;
    }
 
    if (type == "hash256") {
-      cout << "'hash256' options: [ TEXT_OR_BYTES ]" << endl;
+      if (verbose)
+         cout << "'hash256' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      std::getline(cin, tbytes);
+      std::getline(is, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
       if (bytes.size() == 0) // check if parsed correctly
          return false;
       vbyte hash = crypto.Hash256(bytes);
-      cout << "hash: " << chelper::ToHexString(hash) << endl;
+      if (verbose)
+         cout << "hash: ";
+      //output
+      cout << chelper::ToHexString(hash) << endl;
       return true;
    }
 
    if (type == "sha256") {
-      cout << "'sha256' options: [ TEXT_OR_BYTES ]" << endl;
+      if (verbose)
+         cout << "'sha256' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      std::getline(cin, tbytes);
+      std::getline(is, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
       if (bytes.size() == 0) // check if parsed correctly
          return false;
       vbyte hash = crypto.Sha256(bytes);
-      cout << "hash: " << chelper::ToHexString(hash) << endl;
+      if (verbose)
+         cout << "hash: ";
+      // output
+      cout << chelper::ToHexString(hash) << endl;
       return true;
    }
 
    if (type == "ripemd160") {
-      cout << "'ripemd160' options: [ TEXT_OR_BYTES ]" << endl;
+      if (verbose)
+         cout << "'ripemd160' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      std::getline(cin, tbytes);
+      std::getline(is, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
       if (bytes.size() == 0) // check if parsed correctly
          return false;
       vbyte hash = crypto.RIPEMD160(bytes);
-      cout << "hash: " << chelper::ToHexString(hash) << endl;
+      if (verbose)
+         cout << "hash: ";
+      // output
+      cout << chelper::ToHexString(hash) << endl;
       return true;
    }
 
    if (type == "none") {
-      cout << "'none' options: [ TEXT_OR_BYTES ]" << endl;
+      if (verbose)
+         cout << "'none' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      std::getline(cin, tbytes);
+      std::getline(is, tbytes);
       vbyte hash = parseTextBytes(tbytes);
       if (hash.size() == 0) // check if parsed correctly
          return false;
-      cout << "hash: " << chelper::ToHexString(hash) << endl;
+      if (verbose)
+         cout << "hash: ";
+      // output
+      cout << chelper::ToHexString(hash) << endl;
       return true;
    }
 
@@ -177,16 +205,21 @@ execHash()
 }
 
 bool
-execShow()
+execShow(istream& is, bool verbose)
 {
-   cout << "'show' command options: [ engine ]" << endl;
+   if (verbose)
+      cout << "'show' command options: [ engine ]" << endl;
    string type;
-   cin >> type;
+   is >> type;
 
    if (type == "engine") {
-      cout << "'engine' options: [ ]" << endl;
+      if (verbose)
+         cout << "'engine' options: [ ]" << endl;
       Crypto crypto;
-      cout << "libcrypton engine: " << crypto.GetEngine() << endl;
+      if (verbose)
+         cout << "libcrypton engine: ";
+      // output
+      cout << crypto.GetEngine() << endl;
       return true;
    }
 
@@ -194,19 +227,21 @@ execShow()
 }
 
 bool
-execGen()
+execGen(istream& is, bool verbose)
 {
-   cout << "'gen' command options: [ ECC_TYPE ] [ keypair pubkey privkey ]" << endl;
+   if (verbose)
+      cout << "'gen' command options: [ ECC_TYPE ] [ keypair pubkey privkey ]" << endl;
 
    string ecc;
-   cin >> ecc;
+   is >> ecc;
    // ignoring 'ecc' right now.. assuming 'secp256r1'
 
    string type;
-   cin >> type;
+   is >> type;
 
    if (type == "keypair") {
-      cout << "'keypair' options: [ ]" << endl;
+      if (verbose)
+         cout << "'keypair' options: [ ]" << endl;
 
       Crypto crypto;
 
@@ -214,17 +249,24 @@ execGen()
       vbyte mypubkey;
       vbyte myprivkey = crypto.GenerateKeyPair(mypubkey);
 
-      cout << "public key (compressed format): " << chelper::ToHexString(mypubkey) << endl;
-      cout << "private key: " << chelper::ToHexString(myprivkey) << endl;
+      if (verbose)
+         cout << "public key (compressed format): ";
+      // output
+      cout << chelper::ToHexString(mypubkey) << endl;
+      if (verbose)
+         cout << "private key: ";
+      // output
+      cout << chelper::ToHexString(myprivkey) << endl;
 
       return true;
    }
 
    if (type == "pubkey") {
-      cout << "'pubkey' options: [ compressed uncompressed ]" << endl;
+      if (verbose)
+         cout << "'pubkey' options: [ compressed uncompressed ]" << endl;
 
       string pubtype;
-      cin >> pubtype;
+      is >> pubtype;
 
       bool compressed;
       if (pubtype == "compressed")
@@ -233,7 +275,7 @@ execGen()
          compressed = false;
 
       string tbytes;
-      cin >> tbytes;
+      is >> tbytes;
       vbyte privkey = parseTextBytes(tbytes);
 
       if (privkey.size() != 32) // secp256r1
@@ -247,19 +289,24 @@ execGen()
       // creating private/public key pair (random each test)
       vbyte mypubkey = crypto.GetPublicKeyFromPrivateKey(privkey, compressed);
 
-      cout << "public key: " << chelper::ToHexString(mypubkey) << endl;
+      if (verbose)
+         cout << "public key: " << chelper::ToHexString(mypubkey) << endl;
 
       return true;
    }
 
    if (type == "privkey") {
-      cout << "'privkey' options: [ ]" << endl;
+      if (verbose)
+         cout << "'privkey' options: [ ]" << endl;
 
       Crypto crypto;
 
       vbyte privkey = crypto.RandBytes(32); // secp256r1
 
-      cout << "private key: " << chelper::ToHexString(privkey) << endl;
+      if (verbose)
+         cout << "private key: ";
+      // output
+      cout << chelper::ToHexString(privkey) << endl;
 
       return true;
    }
@@ -268,28 +315,37 @@ execGen()
 }
 
 bool
-execBytes()
+execBytes(istream& is, bool verbose)
 {
-   cout << "'bytes' command options: [ reverse length ]" << endl;
+   if (verbose)
+      cout << "'bytes' command options: [ reverse length ]" << endl;
    string type;
-   cin >> type;
+   is >> type;
 
    if (type == "reverse") {
-      cout << "'reverse' options: [ TEXT_OR_BYTES ]" << endl;
+      if (verbose)
+         cout << "'reverse' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      cin >> tbytes;
+      is >> tbytes;
       vbyte bytes = parseTextBytes(tbytes);
       std::reverse(std::begin(bytes), std::end(bytes));
-      cout << "reversed bytes: " << chelper::ToHexString(bytes) << endl;
+      if (verbose)
+         cout << "reversed bytes: ";
+      // output
+      cout << chelper::ToHexString(bytes) << endl;
       return true;
    }
 
    if (type == "length") {
-      cout << "'length' options: [ TEXT_OR_BYTES ]" << endl;
+      if (verbose)
+         cout << "'length' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      cin >> tbytes;
+      is >> tbytes;
       vbyte bytes = parseTextBytes(tbytes);
-      cout << "length: " << bytes.size() << endl;
+      if (verbose)
+         cout << "length: ";
+      // output
+      cout << bytes.size() << endl;
       return true;
    }
 
@@ -297,27 +353,29 @@ execBytes()
 }
 
 bool
-execSign()
+execSign(istream& is, bool verbose)
 {
-   cout << "'sign' command options: [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ TEXT_OR_BYTES ]" << endl;
+   if (verbose)
+      cout << "'sign' command options: [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ TEXT_OR_BYTES ]" << endl;
 
    string ecc;
-   cin >> ecc;
+   is >> ecc;
    // ignoring 'ecc' right now.. assuming 'secp256r1'
 
    string sprivkey;
-   cin >> sprivkey;
+   is >> sprivkey;
    vbyte privkeybytes = parseTextBytes(sprivkey);
 
    if (privkeybytes.size() != 32) {
       std::cerr << "ERROR: private key should have 32 bytes for secp256r1" << std::endl;
+      return false;
    }
 
    string htype;
-   cin >> htype;
+   is >> htype;
 
    string smessage;
-   std::getline(cin, smessage);
+   std::getline(is, smessage);
    vbyte msgbytes = parseTextBytes(smessage);
 
    Crypto crypto;
@@ -328,12 +386,14 @@ execSign()
    if (htype == "sha256")
       hashbytes = crypto.Sha256(msgbytes);
    else {
-      std::cout << "Assuming hash type = 'none'" << endl;
+      if (verbose)
+         std::cout << "Assuming hash type = 'none'" << endl;
       hashbytes = msgbytes;
    }
 
    if (hashbytes.size() != 32) {
       std::cerr << "ERROR: hash should have 32 bytes for secp256r1" << std::endl;
+      return false;
    }
 
    // get compressed pubkey
@@ -341,21 +401,25 @@ execSign()
 
    vbyte sig = crypto.SignData(hashbytes, privkeybytes, mypubkey);
 
-   cout << "signature: " << chelper::ToHexString(sig) << endl;
+   if (verbose)
+      cout << "signature: ";
+   // output
+   cout << chelper::ToHexString(sig) << endl;
    return true;
 }
 
 bool
-execVerify()
+execVerify(istream& is, bool verbose)
 {
-   cout << "'verify' command options: [ ECC_TYPE ] [ PUBLIC_KEY ] [ SIGNATURE ] [ HASH_TYPE ]  [ TEXT_OR_BYTES ] " << endl;
+   if (verbose)
+      cout << "'verify' command options: [ ECC_TYPE ] [ PUBLIC_KEY ] [ SIGNATURE ] [ HASH_TYPE ]  [ TEXT_OR_BYTES ] " << endl;
 
    string ecc;
-   cin >> ecc;
+   is >> ecc;
    // ignoring 'ecc' right now.. assuming 'secp256r1'
 
    string spubkey;
-   cin >> spubkey;
+   is >> spubkey;
    vbyte pubkeybytes = parseTextBytes(spubkey);
 
    if (pubkeybytes.size() != 33) {
@@ -364,20 +428,21 @@ execVerify()
    }
 
    string ssig;
-   cin >> ssig;
+   is >> ssig;
    vbyte sigbytes = parseTextBytes(ssig);
 
    string htype;
-   cin >> htype;
+   is >> htype;
 
    string smessage;
-   std::getline(cin, smessage);
+   std::getline(is, smessage);
    vbyte msgbytes = parseTextBytes(smessage);
 
    Crypto crypto;
 
    vbyte hashbytes;
-   std::cout << "Assuming hash type = 'sha256'" << endl;
+   if (verbose)
+      std::cout << "Assuming hash type = 'sha256'" << endl;
    hashbytes = msgbytes;
 
    if (sigbytes.size() != 64) {
@@ -388,15 +453,19 @@ execVerify()
    // TODO: pass hash type option inside this function
    bool b = crypto.VerifySignature(msgbytes, sigbytes, pubkeybytes);
 
-   cout << "verification result: " << b << endl;
+   if (verbose)
+      cout << "verification result: ";
+   // output
+   cout << b << endl;
 
    return true;
 }
 
 bool
-execRand()
+execRand(istream& is, bool verbose)
 {
-   cout << "'rand' command options: [ BYTE_COUNT ]" << endl;
+   if (verbose)
+      cout << "'rand' command options: [ BYTE_COUNT ]" << endl;
    int count;
    cin >> count;
 
@@ -407,41 +476,98 @@ execRand()
    Crypto crypto;
    vbyte bytes = crypto.RandBytes(count);
 
-   cout << "generated bytes (" << bytes.size() << "): " << chelper::ToHexString(bytes) << endl;
+   if (verbose)
+      cout << "generated bytes (" << bytes.size() << "): ";
+   // output
+   cout << chelper::ToHexString(bytes) << endl;
    return true;
 }
 
 bool
-execute(string command)
+execute(string command, istream& is, bool verbose)
 {
    if (command == "set")
-      return execSet();
+      return execSet(is, verbose);
 
    if (command == "gen")
-      return execGen();
+      return execGen(is, verbose);
 
    if (command == "hash")
-      return execHash();
+      return execHash(is, verbose);
 
    if (command == "bytes") // byte operations
-      return execBytes();
+      return execBytes(is, verbose);
 
    if (command == "rand")
-      return execRand();
+      return execRand(is, verbose);
 
    if (command == "sign")
-      return execSign();
+      return execSign(is, verbose);
 
    if (command == "verify")
-      return execVerify();
+      return execVerify(is, verbose);
 
    if (command == "show")
-      return execShow();
+      return execShow(is, verbose);
 
    if (command == "help")
-      return execHelp();
+      return execHelp(is, verbose);
 
    return false;
+}
+
+int
+executeFromStream(istream& is, bool verbose)
+{
+   if (verbose) {
+      if (verbose)
+         cout << "===============================================" << endl;
+      if (verbose)
+         cout << "Welcome to crypdev: a lib CryptoN tool for devs" << endl;
+      if (verbose)
+         cout << "===============================================" << endl;
+      if (verbose)
+         cout << "Type 'exit' to finish program (or 'help')" << endl;
+   }
+
+   if (verbose)
+      if (verbose)
+         cout << endl
+              << ">";
+
+   string command;
+   is >> command;
+   chelper::trim(command);
+
+   // check exit conditions: "exit" or empty
+   while ((command != "exit") && (command != "")) {
+      if (verbose)
+         if (verbose)
+            cout << "crypdev command: '" << command << "'" << endl;
+
+      if (!execute(command, is, verbose)) {
+         if (verbose)
+            if (verbose)
+               cout << "ERROR: command '" << command << "' failed!" << endl;
+         if (!verbose) // will exit
+            return 1;
+      }
+
+      // get new command
+      if (verbose)
+         if (verbose)
+            cout << endl
+                 << ">";
+      command = "";
+      is >> command;
+      chelper::trim(command);
+   }
+
+   if (verbose)
+      if (verbose)
+         cout << "bye bye" << endl;
+
+   return 0; // good
 }
 
 } // namespace libcrypton
@@ -449,30 +575,39 @@ execute(string command)
 using namespace libcrypton;
 
 int
-main()
+main(int argc, char* argv[])
 {
-   cout << "===============================================" << endl;
-   cout << "Welcome to crypdev: a lib CryptoN tool for devs" << endl;
-   cout << "===============================================" << endl;
-   cout << "Type 'exit' to finish program (or 'help')" << endl;
-
-   cout << endl
-        << ">";
-   string command;
-
-   cin >> command;
-   while (command != "exit") {
-      cout << "crypdev command: '" << command << "'" << endl;
-
-      if (!execute(command))
-         cout << "ERROR: command '" << command << "' failed!" << endl;
-      // get new command
-      cout << endl
-           << ">";
-      cin >> command;
+   if (argc == 2) {
+      std::cerr << "not enough parameters... use -f FILE or -c COMMANDS (\\n separated)" << std::endl;
+      return 1;
    }
 
-   cout << "bye bye" << endl;
+   if (argc == 3) {
+
+      std::string param1 = argv[1];
+      std::string param2 = argv[2];
+
+      if (param1 == string("-f")) {
+         // load from file (line by line)
+         std::ifstream infile(param2);
+         // execute from file (non-verbose)
+         return executeFromStream(infile, false);
+      }
+
+      if (param1 == string("-c")) {
+
+         // load command list
+         std::istringstream ss(param2);
+         // execute from file (non-verbose)
+         return executeFromStream(ss, false);
+      }
+
+      std::cerr << "unrecognized option: '" << param1 << "'" << std::endl;
+      return 1;
+   }
+
+   // interactive mode (verbose = true)
+   executeFromStream(cin, true);
 
    return 0;
 }

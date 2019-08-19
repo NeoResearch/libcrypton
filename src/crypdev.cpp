@@ -305,6 +305,8 @@ execSign()
    Crypto crypto;
 
    vbyte hashbytes;
+   if(htype == "hash")
+      htype = cryptest_hash; // default hash 'sha256'
    if (htype == "sha256")
       hashbytes = crypto.Sha256(msgbytes);
    else {

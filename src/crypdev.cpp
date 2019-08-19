@@ -582,7 +582,7 @@ main(int argc, char* argv[])
    if (argc == 2) {
       std::string param1 = argv[1];
       if (param1 == string("-v")) {
-         std::cout << "version libcrypton: 0.0.0" << std::endl;
+         std::cout << "version libcrypton: 0.1" << std::endl;
          return 0;
       }
       std::cerr << "not enough parameters... use -f \"FILE\" or -c \"COMMANDS;COMMANDS\" (semi-comma separated)" << std::endl;

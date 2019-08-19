@@ -42,6 +42,7 @@ parseTextBytes(string input)
 // finish useful stuff... move to some class!
 
 string cryptest_curve = "secp256r1";
+string cryptest_hash = "sha256";
 
 bool
 execHelp()
@@ -50,12 +51,12 @@ execHelp()
    cout << "'help' command options: [ ]" << endl;
    cout << "existing commands are: " << endl;
 
-   cout << "set [ curve ] [ secp256r1 ]" << endl;
-   cout << "gen [ keypair pubkey privkey ] [ compressed uncompressed ] [ PRIVATE_KEY ]" << endl;
+   cout << "set [ ecc hash ] [ secp256r1 | sha256 ]" << endl;
+   cout << "gen [ ECC_TYPE ] [ keypair pubkey privkey ] [ compressed uncompressed ] [ PRIVATE_KEY ]" << endl;
    cout << "hash [ hash160 hash256 sha256 ripemd160 ] [ TEXT_OR_BYTES ]" << endl;
    cout << "bytes [ reverse length ] [ TEXT_OR_BYTES ]" << endl;
-   cout << "sign [ PRIVATE_KEY ] [ MESSAGE ] " << endl;
-   cout << "verify [ PUBLIC_KEY ] [ MESSAGE ] [ SIGNATURE ] " << endl;
+   cout << "sign [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ MESSAGE ] " << endl;
+   cout << "verify [ ECC_TYPE ] [ PUBLIC_KEY ] [ HASH_TYPE ] [ MESSAGE ] [ SIGNATURE ] " << endl;
    cout << "rand [ BYTE_COUNT ] " << endl;
    cout << "show [ engine ]" << endl;
 
@@ -65,17 +66,29 @@ execHelp()
 bool
 execSet()
 {
-   cout << "'set' command options: [ curve ]" << endl;
+   cout << "'set' command options: [ ecc hash ]" << endl;
    string type;
    cin >> type;
 
-   if (type == "curve") {
-      cout << "'curve' options: [ secp256r1 ]" << endl;
+   if (type == "ecc") {
+      cout << "'ecc' options: [ secp256r1 ]" << endl;
       string curve;
       cin >> curve;
       if (curve == "secp256r1") {
          cryptest_curve = curve;
-         cout << "CURVE SET TO '" << cryptest_curve << "'" << endl;
+         cout << "DEFAULT ECC SET TO '" << cryptest_curve << "'" << endl;
+         return true;
+      }
+      return false;
+   }
+
+   if (type == "hash") {
+      cout << "'hash' options: [ sha256 ]" << endl;
+      string shash;
+      cin >> shash;
+      if (shash == "sha256") {
+         cryptest_hash = shash;
+         cout << "DEFAULT HASH SET TO '" << cryptest_hash << "'" << endl;
          return true;
       }
       return false;
@@ -87,7 +100,7 @@ execSet()
 bool
 execHash()
 {
-   cout << "'hash' command options: [ hash160 hash256 sha256 ripemd160 ]" << endl;
+   cout << "'hash' command options: [ hash160 hash256 sha256 ripemd160 none ]" << endl;
    string type;
    cin >> type;
 
@@ -133,6 +146,15 @@ execHash()
       return true;
    }
 
+   if (type == "none") {
+      cout << "'none' options: [ TEXT_OR_BYTES ]" << endl;
+      string tbytes;
+      cin >> tbytes;
+      vbyte hash = parseTextBytes(tbytes);
+      cout << "hash: " << chelper::ToHexString(hash) << endl;
+      return true;
+   }
+
    return false;
 }
 
@@ -156,7 +178,12 @@ execShow()
 bool
 execGen()
 {
-   cout << "'gen' command options: [ keypair ]" << endl;
+   cout << "'gen' command options: [ ECC_TYPE ] [ keypair pubkey privkey ]" << endl;
+
+   string ecc;
+   cin >> ecc;
+   // ignoring 'ecc' right now.. assuming 'secp256r1'
+
    string type;
    cin >> type;
 
@@ -254,7 +281,12 @@ execBytes()
 bool
 execSign()
 {
-   cout << "'sign' command options: [ PRIVATE_KEY ] [ MESSAGE ]" << endl;
+   cout << "'sign' command options: [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ MESSAGE ]" << endl;
+
+   string ecc;
+   cin >> ecc;
+   // ignoring 'ecc' right now.. assuming 'secp256r1'
+
    string sprivkey;
    cin >> sprivkey;
    vbyte privkeybytes = parseTextBytes(sprivkey);
@@ -263,13 +295,22 @@ execSign()
       std::cerr << "ERROR: private key should have 32 bytes for secp256r1" << std::endl;
    }
 
+   string htype;
+   cin >> htype;
+
    string smessage;
    cin >> smessage;
    vbyte msgbytes = parseTextBytes(smessage);
 
    Crypto crypto;
 
-   vbyte hashbytes = crypto.Sha256(msgbytes);
+   vbyte hashbytes;
+   if (htype == "sha256")
+      hashbytes = crypto.Sha256(msgbytes);
+   else {
+      std::cout << "Assuming hash type = 'none'" << endl;
+      hashbytes = msgbytes;
+   }
 
    if (hashbytes.size() != 32) {
       std::cerr << "ERROR: hash should have 32 bytes for secp256r1" << std::endl;
@@ -287,7 +328,12 @@ execSign()
 bool
 execVerify()
 {
-   cout << "'verify' command options: [ PUBLIC_KEY ] [ MESSAGE ] [ SIGNATURE ]" << endl;
+   cout << "'verify' command options: [ ECC_TYPE ] [ PUBLIC_KEY ] [ HASH_TYPE ]  [ MESSAGE ] [ SIGNATURE ]" << endl;
+
+   string ecc;
+   cin >> ecc;
+   // ignoring 'ecc' right now.. assuming 'secp256r1'
+
    string spubkey;
    cin >> spubkey;
    vbyte pubkeybytes = parseTextBytes(spubkey);
@@ -297,9 +343,18 @@ execVerify()
       return false;
    }
 
+   string htype;
+   cin >> htype;
+
    string smessage;
    cin >> smessage;
    vbyte msgbytes = parseTextBytes(smessage);
+
+   Crypto crypto;
+
+   vbyte hashbytes;
+   std::cout << "Assuming hash type = 'sha256'" << endl;
+   hashbytes = msgbytes;
 
    string ssig;
    cin >> ssig;
@@ -310,8 +365,7 @@ execVerify()
       return false;
    }
 
-   Crypto crypto;
-
+   // TODO: pass hash type option inside this function
    bool b = crypto.VerifySignature(msgbytes, sigbytes, pubkeybytes);
 
    cout << "verification result: " << b << endl;

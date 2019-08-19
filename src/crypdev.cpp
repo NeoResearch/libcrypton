@@ -18,12 +18,19 @@ namespace libcrypton {
 vbyte
 parseTextBytes(string input)
 {
+   // remove spaces
+   chelper::trim(input);
+
    if (input.size() < 2) {
       cerr << "malformed input, returning empty bytes" << endl;
       return vbyte(0);
    }
 
    if (input[0] == '"') {
+      if (input[input.length() - 1] != '\"') {
+         std::cerr << "failed to parse string (spaces not allowed)" << std::endl;
+      }
+
       input = input.substr(1, input.length() - 2);
       cout << "input now is '" << input << "'" << endl;
       // convert to hex
@@ -55,8 +62,8 @@ execHelp()
    cout << "gen [ ECC_TYPE ] [ keypair pubkey privkey ] [ compressed uncompressed ] [ PRIVATE_KEY ]" << endl;
    cout << "hash [ hash160 hash256 sha256 ripemd160 none ] [ TEXT_OR_BYTES ]" << endl;
    cout << "bytes [ reverse length ] [ TEXT_OR_BYTES ]" << endl;
-   cout << "sign [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ MESSAGE ] " << endl;
-   cout << "verify [ ECC_TYPE ] [ PUBLIC_KEY ] [ HASH_TYPE ] [ MESSAGE ] [ SIGNATURE ] " << endl;
+   cout << "sign [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ BYTES ] " << endl;
+   cout << "verify [ ECC_TYPE ] [ PUBLIC_KEY ] [ HASH_TYPE ] [ BYTES ] [ SIGNATURE ] " << endl;
    cout << "rand [ BYTE_COUNT ] " << endl;
    cout << "show [ engine ]" << endl;
 
@@ -109,7 +116,7 @@ execHash()
    if (type == "hash160") {
       cout << "'hash160' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      cin >> tbytes;
+      std::getline(cin, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
       vbyte hash = crypto.Hash160(bytes);
       cout << "hash: " << chelper::ToHexString(hash) << endl;
@@ -119,7 +126,7 @@ execHash()
    if (type == "hash256") {
       cout << "'hash256' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      cin >> tbytes;
+      std::getline(cin, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
       vbyte hash = crypto.Hash256(bytes);
       cout << "hash: " << chelper::ToHexString(hash) << endl;
@@ -129,7 +136,7 @@ execHash()
    if (type == "sha256") {
       cout << "'sha256' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      cin >> tbytes;
+      std::getline(cin, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
       vbyte hash = crypto.Sha256(bytes);
       cout << "hash: " << chelper::ToHexString(hash) << endl;
@@ -139,7 +146,7 @@ execHash()
    if (type == "ripemd160") {
       cout << "'ripemd160' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      cin >> tbytes;
+      std::getline(cin, tbytes);
       vbyte bytes = parseTextBytes(tbytes);
       vbyte hash = crypto.RIPEMD160(bytes);
       cout << "hash: " << chelper::ToHexString(hash) << endl;
@@ -149,7 +156,7 @@ execHash()
    if (type == "none") {
       cout << "'none' options: [ TEXT_OR_BYTES ]" << endl;
       string tbytes;
-      cin >> tbytes;
+      std::getline(cin, tbytes);
       vbyte hash = parseTextBytes(tbytes);
       cout << "hash: " << chelper::ToHexString(hash) << endl;
       return true;
@@ -281,7 +288,7 @@ execBytes()
 bool
 execSign()
 {
-   cout << "'sign' command options: [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ MESSAGE ]" << endl;
+   cout << "'sign' command options: [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ BYTES ]" << endl;
 
    string ecc;
    cin >> ecc;
@@ -305,7 +312,7 @@ execSign()
    Crypto crypto;
 
    vbyte hashbytes;
-   if(htype == "hash")
+   if (htype == "hash")
       htype = cryptest_hash; // default hash 'sha256'
    if (htype == "sha256")
       hashbytes = crypto.Sha256(msgbytes);
@@ -330,7 +337,7 @@ execSign()
 bool
 execVerify()
 {
-   cout << "'verify' command options: [ ECC_TYPE ] [ PUBLIC_KEY ] [ HASH_TYPE ]  [ MESSAGE ] [ SIGNATURE ]" << endl;
+   cout << "'verify' command options: [ ECC_TYPE ] [ PUBLIC_KEY ] [ HASH_TYPE ]  [ BYTES ] [ SIGNATURE ]" << endl;
 
    string ecc;
    cin >> ecc;

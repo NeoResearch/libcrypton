@@ -590,7 +590,7 @@ public:
 
    std::string version() const
    {
-      return "libcrypton: 0.1";
+      return "libcrypton: 0.2";
    }
 
 }; // ModuleCryotoDev

@@ -132,8 +132,6 @@ public:
          string tbytes;
          std::getline(is, tbytes);
          vbyte bytes = parseTextBytes(tbytes);
-         if (bytes.size() == 0) // check if parsed correctly
-            return false;
          vbyte hash = crypto.Hash160(bytes);
          if (verbose)
             os << "hash: ";
@@ -148,8 +146,6 @@ public:
          string tbytes;
          std::getline(is, tbytes);
          vbyte bytes = parseTextBytes(tbytes);
-         if (bytes.size() == 0) // check if parsed correctly
-            return false;
          vbyte hash = crypto.Hash256(bytes);
          if (verbose)
             os << "hash: ";
@@ -164,8 +160,6 @@ public:
          string tbytes;
          std::getline(is, tbytes);
          vbyte bytes = parseTextBytes(tbytes);
-         if (bytes.size() == 0) // check if parsed correctly
-            return false;
          vbyte hash = crypto.Sha256(bytes);
          if (verbose)
             os << "hash: ";
@@ -180,8 +174,6 @@ public:
          string tbytes;
          std::getline(is, tbytes);
          vbyte bytes = parseTextBytes(tbytes);
-         if (bytes.size() == 0) // check if parsed correctly
-            return false;
          vbyte hash = crypto.RIPEMD160(bytes);
          if (verbose)
             os << "hash: ";
@@ -196,8 +188,6 @@ public:
          string tbytes;
          std::getline(is, tbytes);
          vbyte hash = parseTextBytes(tbytes);
-         if (hash.size() == 0) // check if parsed correctly
-            return false;
          if (verbose)
             os << "hash: ";
          // output

@@ -71,7 +71,7 @@ public:
       os << "sign [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ TEXT_OR_BYTES ] " << endl;
       os << "verify [ ECC_TYPE ] [ PUBLIC_KEY ] [ SIGNATURE ] [ HASH_TYPE ] [ TEXT_OR_BYTES ]  " << endl;
       os << "rand [ BYTE_COUNT ] " << endl;
-      os << "show [ engine ]" << endl;
+      os << "show [ engine ecc hash ]" << endl;
 
       return true;
    }
@@ -79,7 +79,6 @@ public:
    bool
    execSet(istream& is, ostream& os, bool verbose)
    {
-
       if (verbose)
          os << "'set' command options: [ ecc hash ]" << endl;
       string type;
@@ -202,7 +201,7 @@ public:
    execShow(istream& is, ostream& os, bool verbose)
    {
       if (verbose)
-         os << "'show' command options: [ engine ]" << endl;
+         os << "'show' command options: [ engine ecc show ]" << endl;
       string type;
       is >> type;
 
@@ -214,6 +213,28 @@ public:
             os << "libcrypton engine: ";
          // output
          os << crypto.GetEngine() << endl;
+         return true;
+      }
+
+      if (type == "ecc") {
+         if (verbose)
+            os << "'ecc' options: [ ]" << endl;
+         Crypto crypto;
+         if (verbose)
+            os << "libcrypton default ecc: ";
+         // output
+         os << cryptest_curve << endl;
+         return true;
+      }
+
+      if (type == "hash") {
+         if (verbose)
+            os << "'hash' options: [ ]" << endl;
+         Crypto crypto;
+         if (verbose)
+            os << "libcrypton default hash: ";
+         // output
+         os << cryptest_hash << endl;
          return true;
       }
 
@@ -284,7 +305,9 @@ public:
          vbyte mypubkey = crypto.GetPublicKeyFromPrivateKey(privkey, compressed);
 
          if (verbose)
-            os << "public key: " << chelper::ToHexString(mypubkey) << endl;
+            os << "public key: ";
+         // output
+         os << chelper::ToHexString(mypubkey) << endl;
 
          return true;
       }

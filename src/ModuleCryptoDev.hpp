@@ -3,6 +3,7 @@
 
 // standard includes
 #include <algorithm>
+#include <chrono> // chrono
 #include <fstream>
 #include <functional>
 #include <iomanip> // fill zero for hex
@@ -561,11 +562,15 @@ public:
          if (verbose)
             os << "crypdev command: '" << command << "'" << endl;
 
+         auto t_start = std::chrono::high_resolution_clock::now();
          if (!execute(command, is, os, verbose)) {
             cerr << "ERROR: command '" << command << "' failed!" << endl;
             if (!verbose) // will exit
                return 1;
          }
+         auto t_end = std::chrono::high_resolution_clock::now();
+         if (verbose)
+            os << " -> Spent " << std::chrono::duration<double, std::milli>(t_end - t_start).count() << " ms" << endl;
 
          // get new command
          if (verbose)

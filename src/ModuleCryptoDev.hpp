@@ -58,7 +58,7 @@ public:
    string cryptest_hash = "sha256";
 
    bool
-   execHelp(istream& is, ostream& os, bool verbose)
+   execHelp(istream& is, ostream& os, bool verbose, double& spentTime)
    {
       os << endl;
       if (verbose)
@@ -78,7 +78,7 @@ public:
    }
 
    bool
-   execSet(istream& is, ostream& os, bool verbose)
+   execSet(istream& is, ostream& os, bool verbose, double& spentTime)
    {
       if (verbose)
          os << "'set' command options: [ ecc hash ]" << endl;
@@ -117,7 +117,7 @@ public:
    }
 
    bool
-   execHash(istream& is, ostream& os, bool verbose)
+   execHash(istream& is, ostream& os, bool verbose, double& spentTime)
    {
       if (verbose)
          os << "'hash' command options: [ hash160 hash256 sha256 ripemd160 none ]" << endl;
@@ -132,7 +132,10 @@ public:
          string tbytes;
          std::getline(is, tbytes);
          vbyte bytes = parseTextBytes(tbytes);
+         auto t_start = std::chrono::high_resolution_clock::now();
          vbyte hash = crypto.Hash160(bytes);
+         auto t_end = std::chrono::high_resolution_clock::now();
+         spentTime += std::chrono::duration<double, std::milli>(t_end - t_start).count();
          if (verbose)
             os << "hash: ";
          // output
@@ -146,7 +149,10 @@ public:
          string tbytes;
          std::getline(is, tbytes);
          vbyte bytes = parseTextBytes(tbytes);
+         auto t_start = std::chrono::high_resolution_clock::now();
          vbyte hash = crypto.Hash256(bytes);
+         auto t_end = std::chrono::high_resolution_clock::now();
+         spentTime += std::chrono::duration<double, std::milli>(t_end - t_start).count();
          if (verbose)
             os << "hash: ";
          //output
@@ -160,7 +166,10 @@ public:
          string tbytes;
          std::getline(is, tbytes);
          vbyte bytes = parseTextBytes(tbytes);
+         auto t_start = std::chrono::high_resolution_clock::now();
          vbyte hash = crypto.Sha256(bytes);
+         auto t_end = std::chrono::high_resolution_clock::now();
+         spentTime += std::chrono::duration<double, std::milli>(t_end - t_start).count();
          if (verbose)
             os << "hash: ";
          // output
@@ -174,7 +183,10 @@ public:
          string tbytes;
          std::getline(is, tbytes);
          vbyte bytes = parseTextBytes(tbytes);
+         auto t_start = std::chrono::high_resolution_clock::now();
          vbyte hash = crypto.RIPEMD160(bytes);
+         auto t_end = std::chrono::high_resolution_clock::now();
+         spentTime += std::chrono::duration<double, std::milli>(t_end - t_start).count();
          if (verbose)
             os << "hash: ";
          // output
@@ -199,7 +211,7 @@ public:
    }
 
    bool
-   execShow(istream& is, ostream& os, bool verbose)
+   execShow(istream& is, ostream& os, bool verbose, double& spentTime)
    {
       if (verbose)
          os << "'show' command options: [ engine ecc show ]" << endl;
@@ -243,7 +255,7 @@ public:
    }
 
    bool
-   execGen(istream& is, ostream& os, bool verbose)
+   execGen(istream& is, ostream& os, bool verbose, double& spentTime)
    {
       if (verbose)
          os << "'gen' command options: [ ECC_TYPE ] [ keypair pubkey privkey ]" << endl;
@@ -263,7 +275,10 @@ public:
 
          // creating private/public key pair (random each test)
          vbyte mypubkey;
+         auto t_start = std::chrono::high_resolution_clock::now();
          vbyte myprivkey = crypto.GenerateKeyPair(mypubkey);
+         auto t_end = std::chrono::high_resolution_clock::now();
+         spentTime += std::chrono::duration<double, std::milli>(t_end - t_start).count();
 
          if (verbose)
             os << "public key (compressed format): ";
@@ -302,8 +317,11 @@ public:
 
          Crypto crypto;
 
+         auto t_start = std::chrono::high_resolution_clock::now();
          // creating private/public key pair (random each test)
          vbyte mypubkey = crypto.GetPublicKeyFromPrivateKey(privkey, compressed);
+         auto t_end = std::chrono::high_resolution_clock::now();
+         spentTime += std::chrono::duration<double, std::milli>(t_end - t_start).count();
 
          if (verbose)
             os << "public key: ";
@@ -319,7 +337,10 @@ public:
 
          Crypto crypto;
 
+         auto t_start = std::chrono::high_resolution_clock::now();
          vbyte privkey = crypto.RandBytes(32); // secp256r1
+         auto t_end = std::chrono::high_resolution_clock::now();
+         spentTime += std::chrono::duration<double, std::milli>(t_end - t_start).count();
 
          if (verbose)
             os << "private key: ";
@@ -333,7 +354,7 @@ public:
    }
 
    bool
-   execBytes(istream& is, ostream& os, bool verbose)
+   execBytes(istream& is, ostream& os, bool verbose, double& spentTime)
    {
       if (verbose)
          os << "'bytes' command options: [ reverse length ]" << endl;
@@ -374,7 +395,7 @@ public:
    }
 
    bool
-   execSign(istream& is, ostream& os, bool verbose)
+   execSign(istream& is, ostream& os, bool verbose, double& spentTime)
    {
       if (verbose)
          os << "'sign' command options: [ ECC_TYPE ] [ PRIVATE_KEY ] [ HASH_TYPE ] [ TEXT_OR_BYTES ]" << endl;
@@ -420,7 +441,10 @@ public:
       // get compressed pubkey
       vbyte mypubkey = crypto.GetPublicKeyFromPrivateKey(privkeybytes, true);
 
+      auto t_start = std::chrono::high_resolution_clock::now();
       vbyte sig = crypto.SignData(hashbytes, privkeybytes, mypubkey);
+      auto t_end = std::chrono::high_resolution_clock::now();
+      spentTime += std::chrono::duration<double, std::milli>(t_end - t_start).count();
 
       if (verbose)
          os << "signature: ";
@@ -430,7 +454,7 @@ public:
    }
 
    bool
-   execVerify(istream& is, ostream& os, bool verbose)
+   execVerify(istream& is, ostream& os, bool verbose, double& spentTime)
    {
       if (verbose)
          os << "'verify' command options: [ ECC_TYPE ] [ PUBLIC_KEY ] [ SIGNATURE ] [ HASH_TYPE ]  [ TEXT_OR_BYTES ] " << endl;
@@ -471,8 +495,11 @@ public:
          return false;
       }
 
+      auto t_start = std::chrono::high_resolution_clock::now();
       // TODO: pass hash type option inside this function
       bool b = crypto.VerifySignature(msgbytes, sigbytes, pubkeybytes);
+      auto t_end = std::chrono::high_resolution_clock::now();
+      spentTime += std::chrono::duration<double, std::milli>(t_end - t_start).count();
 
       if (verbose)
          os << "verification result: ";
@@ -483,7 +510,7 @@ public:
    }
 
    bool
-   execRand(istream& is, ostream& os, bool verbose)
+   execRand(istream& is, ostream& os, bool verbose, double& spentTime)
    {
       if (verbose)
          os << "'rand' command options: [ BYTE_COUNT ]" << endl;
@@ -496,7 +523,10 @@ public:
          return false;
 
       Crypto crypto;
+      auto t_start = std::chrono::high_resolution_clock::now();
       vbyte bytes = crypto.RandBytes(count);
+      auto t_end = std::chrono::high_resolution_clock::now();
+      spentTime += std::chrono::duration<double, std::milli>(t_end - t_start).count();
 
       if (verbose)
          os << "generated bytes (" << bytes.size() << "): ";
@@ -506,41 +536,41 @@ public:
    }
 
    bool
-   execute(string command, istream& is, ostream& os, bool verbose)
+   execute(string command, istream& is, ostream& os, bool verbose, double& spentTime)
    {
       if (command == "set")
-         return execSet(is, os, verbose);
+         return execSet(is, os, verbose, spentTime);
 
       if (command == "gen")
-         return execGen(is, os, verbose);
+         return execGen(is, os, verbose, spentTime);
 
       if (command == "hash")
-         return execHash(is, os, verbose);
+         return execHash(is, os, verbose, spentTime);
 
       if (command == "bytes") // byte operations
-         return execBytes(is, os, verbose);
+         return execBytes(is, os, verbose, spentTime);
 
       if (command == "rand")
-         return execRand(is, os, verbose);
+         return execRand(is, os, verbose, spentTime);
 
       if (command == "sign")
-         return execSign(is, os, verbose);
+         return execSign(is, os, verbose, spentTime);
 
       if (command == "verify")
-         return execVerify(is, os, verbose);
+         return execVerify(is, os, verbose, spentTime);
 
       if (command == "show")
-         return execShow(is, os, verbose);
+         return execShow(is, os, verbose, spentTime);
 
       if (command == "help")
-         return execHelp(is, os, verbose);
+         return execHelp(is, os, verbose, spentTime);
 
       return false;
    }
 
    // execute crypdev from stream... may be 'cin', file (via -f) or a passed string (via -c)
    int
-   executeFromStream(istream& is, ostream& os, bool verbose)
+   executeFromStream(istream& is, ostream& os, bool verbose, double& spentTime)
    {
       if (verbose) {
          os << "===============================================" << endl;
@@ -562,15 +592,15 @@ public:
          if (verbose)
             os << "crypdev command: '" << command << "'" << endl;
 
-         auto t_start = std::chrono::high_resolution_clock::now();
-         if (!execute(command, is, os, verbose)) {
+         if (verbose)
+            spentTime = 0; // reset every new command (using 'cin' interactive)
+         if (!execute(command, is, os, verbose, spentTime)) {
             cerr << "ERROR: command '" << command << "' failed!" << endl;
             if (!verbose) // will exit
                return 1;
          }
-         auto t_end = std::chrono::high_resolution_clock::now();
-         if (verbose)
-            os << " -> Spent " << std::chrono::duration<double, std::milli>(t_end - t_start).count() << " ms" << endl;
+         if (verbose && spentTime > 0)
+            os << " -> Spent " << spentTime << " ms" << endl;
 
          // get new command
          if (verbose)

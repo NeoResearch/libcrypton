@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 // core includes
 #include <Crypto.h>
@@ -8,37 +8,37 @@
 
 using namespace libcrypton;
 
-TEST(CryptoTest, Test_Hash160_Empty)
+TEST_CASE("CryptoTest:  Test_Hash160_Empty")
 {
    Crypto crypto;
    vbyte v(0); // '': empty byte array
-   EXPECT_EQ(crypto.Hash160(v), crypto.RIPEMD160(crypto.Sha256(v)));
+   REQUIRE(crypto.Hash160(v) == crypto.RIPEMD160(crypto.Sha256(v)));
 }
 
-TEST(CryptoTest, Test_Hash160_Zero)
+TEST_CASE("CryptoTest:  Test_Hash160_Zero")
 {
    Crypto crypto;
    vbyte v(1, 0); // 0x00
-   EXPECT_EQ(crypto.Hash160(v), crypto.RIPEMD160(crypto.Sha256(v)));
+   REQUIRE(crypto.Hash160(v) == crypto.RIPEMD160(crypto.Sha256(v)));
 }
 
-TEST(CryptoTest, Test_Hash256_Empty)
+TEST_CASE("CryptoTest:  Test_Hash256_Empty")
 {
    Crypto crypto;
    vbyte v(0); // '': empty byte array
-   EXPECT_EQ(crypto.Hash256(v), crypto.Sha256(crypto.Sha256(v)));
+   REQUIRE(crypto.Hash256(v) == crypto.Sha256(crypto.Sha256(v)));
 }
 
-TEST(CryptoTest, Test_Hash256_Zero)
+TEST_CASE("CryptoTest:  Test_Hash256_Zero")
 {
    Crypto crypto;
    vbyte v(1, 0); // 0x00
-   EXPECT_EQ(crypto.Hash256(v), crypto.Sha256(crypto.Sha256(v)));
+   REQUIRE(crypto.Hash256(v) == crypto.Sha256(crypto.Sha256(v)));
 }
 
 // verification tests
 
-TEST(CryptoTest, Test_SignData_EmptyMessage)
+TEST_CASE("CryptoTest:  Test_SignData_EmptyMessage")
 {
    Crypto crypto;
    vbyte msg(0); // '': empty message
@@ -51,10 +51,10 @@ TEST(CryptoTest, Test_SignData_EmptyMessage)
    vbyte sig = crypto.SignData(crypto.Sha256(msg), myprivkey, mypubkey);
 
    // test if signature matches public key for message
-   EXPECT_EQ(crypto.VerifySignature(msg, sig, mypubkey), 1);
+   REQUIRE(crypto.VerifySignature(msg, sig, mypubkey) == 1);
 }
 
-TEST(CryptoTest, Test_GeneratePublicKey)
+TEST_CASE("CryptoTest:  Test_GeneratePublicKey")
 {
    Crypto crypto;
 
@@ -66,7 +66,7 @@ TEST(CryptoTest, Test_GeneratePublicKey)
    vbyte otherpub = crypto.GetPublicKeyFromPrivateKey(myprivkey, true);
 
    // test sizes
-   EXPECT_EQ(mypubkey.size(), otherpub.size());
+   REQUIRE(mypubkey.size() == otherpub.size());
    // test pubkeys
-   EXPECT_EQ(mypubkey, otherpub);
+   REQUIRE(mypubkey == otherpub);
 }

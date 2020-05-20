@@ -20,7 +20,7 @@ test: clean src.test
 	./src.test
 
 src.test : src.Test.cpp
-	g++ --coverage -g -O0 --std=c++11 -I$(SRC_PATH) -I$(GTEST_INCLUDE) -I$(GMOCK_INCLUDE) -I$(OPENSSL_PATH)/include -pthread $< -o $@ $(GMOCK_PATH)/gtest/libgtest_main.a $(GMOCK_PATH)/gtest/libgtest.a $(GMOCK_PATH)/libgmock.a $(SRC_PATH)/CryptoNeoOpenSSL.cpp $(SRC_PATH)/CryptoExtra.cpp $(SRC_PATH)/cryptopp/libcryptopp.a  -L$(OPENSSL_PATH) -llinux-openssl-crypto-x86_64 -lpthread -ldl
+	g++ -DCATCH_CONFIG_MAIN --coverage -g -O0 --std=c++11 -I$(SRC_PATH) -I../thirdparty -I$(OPENSSL_PATH)/include -pthread $< -o $@ $(SRC_PATH)/CryptoNeoOpenSSL.cpp $(SRC_PATH)/CryptoExtra.cpp ../thirdparty/cryptopp/libcryptopp.a  -L$(OPENSSL_PATH) -llinux-openssl-crypto-x86_64 -lpthread -ldl
 
 
 test-coverage:

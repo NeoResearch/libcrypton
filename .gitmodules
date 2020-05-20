@@ -1,9 +1,6 @@
 [submodule "libopenssl"]
 	path = libopenssl
 	url = https://github.com/openssl/openssl.git
-[submodule "libgtest"]
-	path = libgtest
-	url = https://github.com/google/googletest.git
 [submodule "thirdparty/cryptopp"]
 	path = thirdparty/cryptopp
 	url = https://github.com/weidai11/cryptopp.git

@@ -10,7 +10,12 @@ bin/crypdev: src/crypdev.cpp src/ModuleCryptoDev.hpp
 	g++ -Ofast --std=c++17 -I$(SRC_PATH) -I$(OPENSSL_PATH)/include -pthread $< -o  $@  $(SRC_PATH)/CryptoNeoOpenSSL.cpp  -L$(OPENSSL_PATH) -llinux-openssl-crypto-x86_64 -lpthread -ldl
 	g++ -Ofast --std=c++17 -I$(SRC_PATH) -I$(OPENSSL_PATH)/include -pthread $< -o  extra$@  $(SRC_PATH)/CryptoNeoOpenSSL.cpp $(SRC_PATH)/CryptoExtra.cpp $(SRC_PATH)/cryptopp/libcryptopp.a  -L$(OPENSSL_PATH) -llinux-openssl-crypto-x86_64 -lpthread -ldl
 
-vendor: openssl cryptopp #clang gtests
+vendor: get_submodules openssl cryptopp #clang gtests
+
+get_submodules:
+	git submodule update --init --recursive
+	git submodule update --recursive
+
 
 openssl:
 	#cd src/core && chmod +x linux_get_build_openssl.sh

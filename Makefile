@@ -18,6 +18,19 @@ get_submodules:
 
 
 openssl:
+ifeq (,$(wildcard ./build/openssl/liblinux-openssl-crypto-x86_64.a))
+	@echo "OpenSSL needs to be built"
+	mkdir -p build/openssl
+	(cd build/openssl && ../../libopenssl/config && make && make test)
+	cp -r libopenssl/include build/openssl/   # include files
+	cp build/openssl/libcrypto.a build/openssl/liblinux-openssl-crypto-x86_64.a
+else
+	@echo "OpenSSL library already exists! ./build/openssl/liblinux-openssl-crypto-x86_64.a"
+endif
+	@echo "=========== Finished OpenSSL ==========="
+
+
+old_openssl:
 	#cd src/core && chmod +x linux_get_build_openssl.sh
 	#cd src/core && ./linux_get_build_openssl.sh
 	mkdir -p build/openssl
@@ -27,8 +40,10 @@ openssl:
 	#cp -r build/openssl/include/openssl/* build/openssl/include/openssl/
 	#mv tmp_build/libcrypto.a crypto/openssl/liblinux-openssl-crypto-x86_64.a
 
+
 cryptopp:
 	cd thirdparty/cryptopp/ && make
+	@echo "=========== Finished Crypto++ ==========="
 
 test:
 	cd tests && make test

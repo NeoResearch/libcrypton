@@ -29,3 +29,6 @@ openssl:
 
 cryptopp:
 	cd thirdparty/cryptopp/ && make
+
+test:
+	cd tests && make test

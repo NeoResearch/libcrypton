@@ -590,7 +590,10 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
    if (newPub == vpubkey)
       return vpriv; // all is fine!
    else
+   {
+      std::cout << "TODO: verify when getpubkey is eventually not same as gen keypair on openssl" << std::endl;
       return GenerateKeyPair(vpubkey); // try again!
+   }
 }
 
 vbyte

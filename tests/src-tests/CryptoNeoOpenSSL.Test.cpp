@@ -45,8 +45,9 @@ TEST_CASE("CryptoTest:  Test_SignData_EmptyMessage")
 
    int countFail = 0;
 
-   for (unsigned t = 0; t < 100; t++)
-   {
+   constexpr double MAX_EXEC = 10000;
+
+   for (unsigned t = 0; t < MAX_EXEC; t++) {
       // creating private/public key pair (random each test)
       vbyte mypubkey;
       vbyte myprivkey = crypto.GenerateKeyPair(mypubkey);
@@ -60,7 +61,7 @@ TEST_CASE("CryptoTest:  Test_SignData_EmptyMessage")
    }
 
    // less than 5% failures
-   REQUIRE(countFail <= 5);
+   REQUIRE(countFail / MAX_EXEC <= 0.05);
 }
 
 TEST_CASE("CryptoTest:  Test_GeneratePublicKey")
@@ -69,8 +70,9 @@ TEST_CASE("CryptoTest:  Test_GeneratePublicKey")
 
    int countFail = 0;
 
-   for (unsigned t = 0; t < 100; t++)
-   {
+   constexpr double MAX_EXEC = 10000;
+
+   for (unsigned t = 0; t < MAX_EXEC; t++) {
       // creating private/public key pair (random each test)
       vbyte mypubkey;
       vbyte myprivkey = crypto.GenerateKeyPair(mypubkey);
@@ -85,6 +87,6 @@ TEST_CASE("CryptoTest:  Test_GeneratePublicKey")
          countFail++;
    }
 
-   // less than 5% failures
-   REQUIRE(countFail <= 5);
+   // less than 0% failures
+   REQUIRE(countFail / MAX_EXEC <= 0.00);
 }

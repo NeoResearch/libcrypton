@@ -397,13 +397,7 @@ Crypto::SignData(const vbyte& digest, const vbyte& privkey, const vbyte& pubkey)
 // =========================
 
 int16
-lVerifySignature(
-  const byte* data,
-  int32 dataLength,
-  const byte* signature,
-  int32 signatureLength,
-  const byte* pubKey,
-  int32 pubKeyLength)
+lVerifySignature(const byte* data, int32 dataLength, const byte* signature, int32 signatureLength, const byte* pubKey, int32 pubKeyLength)
 {
    if (signatureLength != 64)
       return -1;
@@ -521,7 +515,6 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
       return vbyte(0);
    }
 
-   //EC_POINT* pub = EC_KEY_get0_public_key(eckey);
    const BIGNUM* priv = EC_KEY_get0_private_key(eckey);
    vbyte vpriv(32);
    int conv_error = BN_bn2bin(priv, vpriv.data());
@@ -586,14 +579,25 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
    //EC_POINT_free(pub_key);
    EC_GROUP_free(ecgroup);
 
-   return std::move(vpriv);
+   // ========================================================
+   // ================= CHECK GET PUBLIC KEY =================
+   //
+   // IS THIS REALLY NECESSARY?
+   // WHY IS THIS POSSIBLE TO HAPPEN?
+   //
+   // get compressed pubkey from this private key (just generated...)
+   vbyte newPub = GetPublicKeyFromPrivateKey(vpriv, true);
+   if (newPub == vpubkey)
+      return vpriv; // all is fine!
+   else
+      return GenerateKeyPair(vpubkey); // try again!
 }
 
 vbyte
 Crypto::GetPublicKeyFromPrivateKey(const vbyte& priv, bool compressed) const
 {
    // ctx is optional buffer
-   BN_CTX* ctx = BN_CTX_new(); 
+   BN_CTX* ctx = BN_CTX_new();
    // 'res' will receive private key value
    BIGNUM* res = BN_new();
    // convert 'priv' to hexstring (uppercase = true)
@@ -607,8 +611,7 @@ Crypto::GetPublicKeyFromPrivateKey(const vbyte& priv, bool compressed) const
 
    EC_KEY_set_private_key(eckey, res);
 
-   if (!EC_POINT_mul(group, pub_key, res, NULL, NULL, ctx))
-   {
+   if (!EC_POINT_mul(group, pub_key, res, NULL, NULL, ctx)) {
       NEOPT_EXCEPTION("Error at EC_POINT_mul.\n");
       return vbyte(0);
    }
@@ -617,7 +620,7 @@ Crypto::GetPublicKeyFromPrivateKey(const vbyte& priv, bool compressed) const
 
    char* cc;
 
-   if(compressed) 
+   if (compressed)
       cc = EC_POINT_point2hex(group, pub_key, POINT_CONVERSION_COMPRESSED, ctx); // point_conversion_form_t
    else
       cc = EC_POINT_point2hex(group, pub_key, POINT_CONVERSION_UNCOMPRESSED, ctx); // point_conversion_form_t

@@ -1,11 +1,17 @@
 {
+    "[cpp]": {
+        "editor.tabSize": 3,
+        "editor.detectIndentation": false
+    },
+    "C_Cpp.intelliSenseEngine": "Tag Parser",
+    "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle : Mozilla , ColumnLimit : 0, IndentWidth: 3, AccessModifierOffset: -3}",
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
         "**/.hg": true,
         "**/CVS": true,
         "**/.DS_Store": true,
-        "thirdparty/**" : true,
-        "libopenssl/**" : true
+        "thirdparty/**": true,
+        "libopenssl/**": true
     }
 }

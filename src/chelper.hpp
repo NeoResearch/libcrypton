@@ -20,7 +20,7 @@
 
 namespace libcrypton {
 
-#define NEOPT_EXCEPTION(str)                               \
+#define CRYPTON_EXCEPTION(str)                               \
    {                                                       \
       printf("libcrypton error(%s): %s\n", __func__, str); \
       exit(1);                                             \
@@ -96,7 +96,7 @@ public:
    HexToBytes(const std::string& hex)
    {
       // TODO: implement (begin 0x)
-      //NEOPT_EXCEPTION("Not implemented yet: HexToBytes");
+      //CRYPTON_EXCEPTION("Not implemented yet: HexToBytes");
       vbyte bytes(hex.length() / 2);
 
       for (unsigned int i = 0; i < hex.length(); i += 2) {
@@ -110,20 +110,20 @@ public:
    /*
    static UInt160 ToScriptHash(const vbyte& v)
    {
-      NEOPT_EXCEPTION("Not implemented: ToScriptHash");
+      CRYPTON_EXCEPTION("Not implemented: ToScriptHash");
       return UInt160();
    }
 */
 
    static std::string Base58CheckEncode(const vbyte& data)
    {
-      NEOPT_EXCEPTION("Not implemented: Base58CheckEncode");
+      CRYPTON_EXCEPTION("Not implemented: Base58CheckEncode");
       return "";
    }
 
    static vbyte Base58CheckDecode(std::string address)
    {
-      NEOPT_EXCEPTION("Not implemented: Base58CheckDecode");
+      CRYPTON_EXCEPTION("Not implemented: Base58CheckDecode");
       return vbyte(0);
    }
 };

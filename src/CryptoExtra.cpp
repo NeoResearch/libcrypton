@@ -12,7 +12,7 @@ lComputeKeccak(const unsigned char *message, size_t message_len, vbyte& digest);
 
 vbyte CryptoExtra::Sha3NIST(const vbyte& message) const
 {
-   NEOPT_EXCEPTION("NOT IMPLEMENTED SHA3 NIST");
+   CRYPTON_EXCEPTION("NOT IMPLEMENTED SHA3 NIST");
    vbyte voutput(0);
    return voutput;
 }

@@ -233,7 +233,7 @@ Crypto::VerifySignature(const vbyte& message, const vbyte& signature, const vbyt
 {
    int16 ret = lVerifySignature(message.data(), message.size(), signature.data(), signature.size(), pubkey.data(), pubkey.size());
    if (ret == -1)
-      NEOPT_EXCEPTION("ERROR ON VerifySignature");
+      CRYPTON_EXCEPTION("ERROR ON VerifySignature");
    return ret == 1;
 }
 
@@ -275,7 +275,7 @@ Crypto::SignData(const vbyte& digest, const vbyte& privkey, const vbyte& pubkey)
    const byte* hash = digest.data();
    int hashLen = 32;
    if (digest.size() != hashLen) {
-      NEOPT_EXCEPTION("Failed to have digest of 32 bytes for SignData");
+      CRYPTON_EXCEPTION("Failed to have digest of 32 bytes for SignData");
       return vbyte(0);
    }
    const byte* pubKey = pubkey.data();
@@ -285,20 +285,20 @@ Crypto::SignData(const vbyte& digest, const vbyte& privkey, const vbyte& pubkey)
    // initialize environment and initialize private key
    EC_KEY* eckey = EC_KEY_new();
    if (NULL == eckey) {
-      NEOPT_EXCEPTION("Failed to create new EC Key");
+      CRYPTON_EXCEPTION("Failed to create new EC Key");
       return vbyte(0);
    }
 
    EC_GROUP* ecgroup = EC_GROUP_new_by_curve_name(_curve); //NID_secp192k1);
    if (NULL == ecgroup) {
-      NEOPT_EXCEPTION("Failed to create new EC Group");
+      CRYPTON_EXCEPTION("Failed to create new EC Group");
       return vbyte(0);
    }
 
    int set_group_status = EC_KEY_set_group(eckey, ecgroup);
    const int set_group_success = 1;
    if (set_group_success != set_group_status) {
-      NEOPT_EXCEPTION("Failed to set group for EC Key");
+      CRYPTON_EXCEPTION("Failed to set group for EC Key");
       return vbyte(0);
    }
 
@@ -319,14 +319,14 @@ Crypto::SignData(const vbyte& digest, const vbyte& privkey, const vbyte& pubkey)
       memcpy(&realPubKey[1], pubKey, 64);
    } else if (pubKeyLength == 65) {
       if (pubKey[0] != 0x04) {
-         NEOPT_EXCEPTION("Error on signing");
+         CRYPTON_EXCEPTION("Error on signing");
          return vbyte(0);
       }
 
       // remove const from array: must make sure realPubKey data is never changed
       realPubKey = const_cast<byte*>(pubKey);
    } else if (pubKeyLength != 65) {
-      NEOPT_EXCEPTION("Error on signing 2");
+      CRYPTON_EXCEPTION("Error on signing 2");
       return vbyte(0);
    }
 
@@ -341,7 +341,7 @@ Crypto::SignData(const vbyte& digest, const vbyte& privkey, const vbyte& pubkey)
 
    ECDSA_SIG* signature = ECDSA_do_sign(hash, hashLen, eckey);
    if (NULL == signature) {
-      NEOPT_EXCEPTION("Failed to generate EC Signature\n");
+      CRYPTON_EXCEPTION("Failed to generate EC Signature\n");
       return vbyte(0);
    }
 
@@ -491,27 +491,27 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
    //printf("generating priv/pub key\n");
    EC_KEY* eckey = EC_KEY_new();
    if (NULL == eckey) {
-      NEOPT_EXCEPTION("Failed to create new EC Key");
+      CRYPTON_EXCEPTION("Failed to create new EC Key");
       return vbyte(0);
    }
 
    EC_GROUP* ecgroup = EC_GROUP_new_by_curve_name(_curve); //NID_secp192k1);
    if (NULL == ecgroup) {
-      NEOPT_EXCEPTION("Failed to create new EC Group");
+      CRYPTON_EXCEPTION("Failed to create new EC Group");
       return vbyte(0);
    }
 
    int set_group_status = EC_KEY_set_group(eckey, ecgroup);
    const int set_group_success = 1;
    if (set_group_success != set_group_status) {
-      NEOPT_EXCEPTION("Failed to set group for EC Key");
+      CRYPTON_EXCEPTION("Failed to set group for EC Key");
       return vbyte(0);
    }
 
    const int gen_success = 1;
    int gen_status = EC_KEY_generate_key(eckey);
    if (gen_success != gen_status) {
-      NEOPT_EXCEPTION("Failed to generate EC Key");
+      CRYPTON_EXCEPTION("Failed to generate EC Key");
       return vbyte(0);
    }
 
@@ -534,7 +534,7 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
    //EC_POINT* pub_key = EC_POINT_new(ecgroup);
    //if (!EC_POINT_mul(ecgroup, pub_key, priv, NULL, NULL, ctx))
    //{
-   //	NEOPT_EXCEPTION("Error at EC_POINT_mul. Getting pubkey failed.");
+   //	CRYPTON_EXCEPTION("Error at EC_POINT_mul. Getting pubkey failed.");
    //	return vbyte(0);
    //}
 
@@ -591,7 +591,7 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
       return vpriv; // all is fine!
    else
    {
-      std::cout << "TODO: verify when getpubkey is eventually not same as gen keypair on openssl" << std::endl;
+      std::cout << "WARNING: verify when getpubkey is eventually not same as gen keypair on openssl" << std::endl;
       return GenerateKeyPair(vpubkey); // try again!
    }
 }
@@ -615,7 +615,7 @@ Crypto::GetPublicKeyFromPrivateKey(const vbyte& priv, bool compressed) const
    EC_KEY_set_private_key(eckey, res);
 
    if (!EC_POINT_mul(group, pub_key, res, NULL, NULL, ctx)) {
-      NEOPT_EXCEPTION("Error at EC_POINT_mul.\n");
+      CRYPTON_EXCEPTION("Error at EC_POINT_mul.\n");
       return vbyte(0);
    }
 
@@ -718,7 +718,7 @@ lComputeSHA256(const byte* data, int32 length, byte* output)
 void
 handleErrors()
 {
-   NEOPT_EXCEPTION("ERROR IN SHA3!");
+   CRYPTON_EXCEPTION("ERROR IN SHA3!");
 }
 
 void

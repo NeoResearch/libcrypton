@@ -722,6 +722,7 @@ lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key
    std::cout << "AES_BLOCK_SIZE: " << AES_BLOCK_SIZE << std::endl;
 
    assert(keylength == 32);
+   assert(keylength*8 == 256);
    assert(AES_BLOCK_SIZE == 16);
    assert(ivlength == AES_BLOCK_SIZE);
    assert(inputslength % 16 == 0);
@@ -745,7 +746,7 @@ lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key
     //memset(dec_out, 0, sizeof(dec_out));
 
     AES_KEY enc_key, dec_key;
-    AES_set_encrypt_key(aes_key, keylength, &enc_key);
+    AES_set_encrypt_key(aes_key, keylength*8, &enc_key);
     AES_cbc_encrypt(aes_input, enc_out, inputslength, &enc_key, iv_enc, AES_ENCRYPT);
 
     //AES_set_decrypt_key(aes_key, keylength, &dec_key);

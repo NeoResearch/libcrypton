@@ -60,6 +60,8 @@ public:
    // RIPEMD160
    vbyte RIPEMD160(const vbyte& message) const;
 
+   vbyte AESCbcEncrypt256(const vbyte& message, const vbyte& key, vbyte& iv) const;
+
    vbyte Sign(const vbyte& message, const vbyte& privkey, const vbyte& pubkey) const
    {
       return SignData(Sha256(message), privkey, pubkey);

@@ -3,6 +3,7 @@
 // third-party includes
 #include <openssl/obj_mac.h> // for NID_secp192k1
 
+#include <openssl/aes.h>
 #include <openssl/ec.h>    // for EC_GROUP_new_by_curve_name, EC_GROUP_free, EC_KEY_new, EC_KEY_set_group, EC_KEY_generate_key, EC_KEY_free
 #include <openssl/ecdsa.h> // for ECDSA_do_sign, ECDSA_do_verify
 #include <openssl/ripemd.h>
@@ -11,6 +12,10 @@
 #include <openssl/evp.h> // sha-3 (unknown if keccak or post-keccak / NIST SHA-3)
 
 #include <iostream>
+
+
+
+#include <openssl/rand.h>
 
 using namespace libcrypton;
 //using namespace std; // do not use
@@ -44,7 +49,9 @@ void
 lComputeHash256(const byte* data, int32 length, byte* output);
 void
 lComputeRIPEMD160(const byte* data, int32 length, byte* output);
-
+void
+lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key, int32 keylength, byte* iv_enc, int32 ivlength, byte* enc_out, int32 outlength);
+   
 void
 lComputeSHA3OpenSSL(const unsigned char* message, size_t message_len, unsigned char** digest, unsigned int* digest_len);
 
@@ -263,6 +270,16 @@ Crypto::RIPEMD160(const vbyte& message) const
    lComputeRIPEMD160(message.data(), message.size(), voutput.data());
    return voutput;
 }
+
+vbyte
+Crypto::AESCbcEncrypt256(const vbyte& message, const vbyte& key, vbyte& iv) const
+{
+   const size_t encslength = ((message.size() + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+   vbyte voutput(encslength);
+   lAESCbcEncrypt256(message.data(), message.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size());
+   return voutput;
+}
+
 
 // message is already received as a SHA256 digest
 // TODO: better to receive pubkey in general format or specific ECPoint(X,Y) ?
@@ -679,6 +696,57 @@ lComputeRIPEMD160(const byte* data, int32 length, byte* output)
    RIPEMD160_Update(&c, data, length);
    RIPEMD160_Final(output, &c);
    OPENSSL_cleanse(&c, sizeof(c));
+}
+
+static void hex_print(const void* pv, size_t len)
+{
+    const unsigned char * p = (const unsigned char*)pv;
+    if (NULL == pv)
+        printf("NULL");
+    else
+    {
+        size_t i = 0;
+        for (; i<len;++i)
+            printf("%02X ", *p++);
+    }
+    printf("\n");
+}
+
+void
+lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key, int32 keylength, byte* iv_enc, int32 ivlength, byte* enc_out, int32 outlength)
+{
+    /* generate input with a given length */
+    //unsigned char aes_input[inputslength];
+    //memset(aes_input, 'X', inputslength);
+
+    /* init vector */
+    //unsigned char iv_enc[AES_BLOCK_SIZE];
+    //unsigned char iv_dec[AES_BLOCK_SIZE];
+    //RAND_bytes(iv_enc, AES_BLOCK_SIZE);
+    //memcpy(iv_dec, iv_enc, AES_BLOCK_SIZE);
+
+    // buffers for encryption and decryption
+    //unsigned char enc_out[encslength];
+    //unsigned char dec_out[inputslength];
+    memset(enc_out, 0, sizeof(enc_out));
+    //memset(dec_out, 0, sizeof(dec_out));
+
+    AES_KEY enc_key, dec_key;
+    AES_set_encrypt_key(aes_key, keylength, &enc_key);
+    AES_cbc_encrypt(aes_input, enc_out, inputslength, &enc_key, iv_enc, AES_ENCRYPT);
+
+    //AES_set_decrypt_key(aes_key, keylength, &dec_key);
+    //AES_cbc_encrypt(enc_out, dec_out, outlength, &dec_key, iv_dec, AES_DECRYPT);
+
+
+    printf("original:\t");
+    hex_print(aes_input, sizeof(aes_input));
+
+    printf("encrypt:\t");
+    hex_print(enc_out, sizeof(enc_out));
+
+    //printf("decrypt:\t");
+    //hex_print(dec_out, sizeof(dec_out));
 }
 
 void

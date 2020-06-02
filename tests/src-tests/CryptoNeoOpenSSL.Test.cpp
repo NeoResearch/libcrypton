@@ -5,6 +5,7 @@
 #include <ICrypto.h>
 //#include<system/vhelper.hpp>
 //#include<system/shelper.h>
+//#include "chelper.hpp"
 
 using namespace libcrypton;
 
@@ -27,6 +28,18 @@ TEST_CASE("CryptoTest:  Test_Hash256_Empty")
    Crypto crypto;
    vbyte v(0); // '': empty byte array
    REQUIRE(crypto.Hash256(v) == crypto.Sha256(crypto.Sha256(v)));
+}
+
+TEST_CASE("CryptoTest:  Test_AESCbcEncrypt256_10_0x58")
+{
+   Crypto crypto;
+   
+   vbyte data = libcrypton::chelper::HexToBytes("00000000000000000000000000000000");
+   vbyte key = libcrypton::chelper::HexToBytes("12345678123456781234567812345678");
+   vbyte iv = libcrypton::chelper::HexToBytes("1234567812345678");
+   vbyte result = libcrypton::chelper::HexToBytes("07c748cf7d326782f82e60ebe60e2fac289e84e9ce91c1bc41565d14ecb53640");
+   
+   REQUIRE(crypto.AESCbcEncrypt256(data,key,iv) == result);
 }
 
 TEST_CASE("CryptoTest:  Test_Hash256_Zero")

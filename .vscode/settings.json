@@ -13,5 +13,8 @@
         "**/.DS_Store": true,
         "thirdparty/**": true,
         "libopenssl/**": true
+    },
+    "files.associations": {
+        "initializer_list": "cpp"
     }
 }

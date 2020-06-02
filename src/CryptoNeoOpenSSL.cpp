@@ -275,7 +275,7 @@ vbyte
 Crypto::AESCbcEncrypt256(const vbyte& message, const vbyte& key, vbyte& iv) const
 {
    const size_t encslength = ((message.size() + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
-   vbyte voutput(encslength);
+   vbyte voutput(encslength, 0x00);
    lAESCbcEncrypt256(message.data(), message.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size());
    return voutput;
 }
@@ -715,6 +715,18 @@ static void hex_print(const void* pv, size_t len)
 void
 lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key, int32 keylength, byte* iv_enc, int32 ivlength, byte* enc_out, int32 outlength)
 {
+   std::cout << "inputs length: " << inputslength << std::endl;
+   std::cout << "keylength: " << keylength << std::endl;
+   std::cout << "ivlength: " << ivlength << std::endl;
+   std::cout << "outlength: " << outlength << std::endl;
+   std::cout << "AES_BLOCK_SIZE: " << AES_BLOCK_SIZE << std::endl;
+
+   assert(keylength == 32);
+   assert(AES_BLOCK_SIZE == 16);
+   assert(ivlength == AES_BLOCK_SIZE);
+   assert(inputslength % 16 == 0);
+   
+
     /* generate input with a given length */
     //unsigned char aes_input[inputslength];
     //memset(aes_input, 'X', inputslength);
@@ -728,7 +740,8 @@ lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key
     // buffers for encryption and decryption
     //unsigned char enc_out[encslength];
     //unsigned char dec_out[inputslength];
-    memset(enc_out, 0, sizeof(enc_out));
+    //memset(enc_out, 0, sizeof(enc_out));
+    
     //memset(dec_out, 0, sizeof(dec_out));
 
     AES_KEY enc_key, dec_key;

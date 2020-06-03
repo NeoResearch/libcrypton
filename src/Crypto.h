@@ -62,7 +62,7 @@ public:
 
    vbyte AESCbcEncrypt256(const vbyte& message, const vbyte& key, vbyte& iv) const;
 
-   vbyte AESEncrypt256NoPadding(const vbyte& message, const vbyte& key, vbyte& iv, bool ecb) const;
+   vbyte AESEncrypt256NoPadding(const vbyte& message, const vbyte& key, vbyte& iv, bool padding, bool ecb) const;
 
    vbyte AESCbcDecrypt256NoPadding(const vbyte& message, const vbyte& key, vbyte& iv) const;
 

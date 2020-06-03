@@ -295,14 +295,12 @@ Crypto::AESCbcEncrypt256(const vbyte& message, const vbyte& key, vbyte& iv) cons
 }
 
 vbyte
-Crypto::AESEncrypt256NoPadding(const vbyte& message, const vbyte& key, vbyte& iv, bool ecb) const
+Crypto::AESEncrypt256NoPadding(const vbyte& message, const vbyte& key, vbyte& iv, bool padding, bool ecb) const
 {
    //const size_t encslength = ((message.size() + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
    const size_t encslength = ((message.size() + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
    // -1 requires NO PADDING
    vbyte voutput(encslength, 0x00);
-   
-   bool padding = false;
    int real_size = lAESCbcEncrypt256NoPadding(message.data(), message.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size(), padding, ecb);
    std::cout << "given size: " << voutput.size() << " out_size=" << real_size << std::endl;
    vbyte realout(voutput.begin(), voutput.begin()+real_size);

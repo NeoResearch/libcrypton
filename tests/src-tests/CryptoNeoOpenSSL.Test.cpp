@@ -33,7 +33,7 @@ TEST_CASE("CryptoTest:  Test_Hash256_Empty")
 TEST_CASE("CryptoTest:  Test_AESCbcEncrypt256_10_0x58")
 {
    Crypto crypto;
-   
+
    vbyte data = chelper::HexToBytes(chelper::ASCIIToHexString("00000000000000000000000000000000"));
    vbyte key = chelper::HexToBytes(chelper::ASCIIToHexString("12345678123456781234567812345678"));
    vbyte iv = chelper::HexToBytes(chelper::ASCIIToHexString("1234567812345678"));
@@ -43,14 +43,52 @@ TEST_CASE("CryptoTest:  Test_AESCbcEncrypt256_10_0x58")
    std::cout << "message size = " << data.size() << std::endl;
    std::cout << "key size = " << key.size() << std::endl;
    std::cout << "iv size = " << iv.size() << std::endl;
-   vbyte out = crypto.AESCbcEncrypt256NoPadding(data,key,iv);
+   vbyte out = crypto.AESCbcEncrypt256NoPadding(data, key, iv);
    std::cout << "out size = " << out.size() << std::endl;
 
    std::cout << "result size = " << result.size() << std::endl;
-   
+
    REQUIRE(out == result);
 }
 
+/*
+TEST_CASE("CryptoTest:  Test_AESCbcEncryptDecrypt256_Example_OpenSSL")
+{
+   Crypto crypto;
+
+   // A 256 bit key 
+   std::string str_key = "01234567890123456789012345678901";
+
+   // A 128 bit IV 
+   std::string str_iv = "0123456789012345";
+
+   // Message to be encrypted 
+   std::string str_plaintext = "The quick brown fox jumps over the lazy dog";
+
+   vbyte data = chelper::HexToBytes(chelper::ASCIIToHexString(str_plaintext));
+   vbyte key = chelper::HexToBytes(chelper::ASCIIToHexString(str_key));
+   vbyte iv = chelper::HexToBytes(chelper::ASCIIToHexString(str_iv));
+   assert(iv.size() == 16); // 16 bytes is AES block (both CBC and CFB)
+
+   vbyte vcypher = crypto.AESCbcEncrypt256NoPadding(data,key,iv);
+
+
+   vbyte result = libcrypton::chelper::HexToBytes("e06f63a711e8b7aa9f9440107d4680a117994380ea31d2a299b95302d439b9702c8e65a99236ec920704915cf1a98a44");
+   // 0000 - e0 6f 63 a7 11 e8 b7 aa-9f 94 40 10 7d 46 80 a1   .oc.......@.}F..
+   // 0010 - 17 99 43 80 ea 31 d2 a2-99 b9 53 02 d4 39 b9 70   ..C..1....S..9.p
+   // 0020 - 2c 8e 65 a9 92 36 ec 92-07 04 91 5c f1 a9 8a 44   ,.e..6.....\...D
+
+   std::cout << "message size = " << data.size() << std::endl;
+   std::cout << "key size = " << key.size() << std::endl;
+   std::cout << "iv size = " << iv.size() << std::endl;
+   //vbyte out = crypto.AESCbcEncrypt256NoPadding(data,key,iv);
+   //std::cout << "out size = " << out.size() << std::endl;
+
+   std::cout << "result size = " << result.size() << std::endl;
+   
+   REQUIRE(vcypher == result);
+}
+*/
 
 TEST_CASE("CryptoTest:  Test_Hash256_Zero")
 {

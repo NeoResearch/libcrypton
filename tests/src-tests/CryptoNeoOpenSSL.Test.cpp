@@ -107,9 +107,16 @@ TEST_CASE("CryptoTest:  Test_AESEncrypt_Example_OpenSSL_Padding_CBC")
    std::cout << "result size = " << result.size() << std::endl;
    
    REQUIRE(vcypher == result);
+
+   vbyte resultDecrypt = crypto.AESDecrypt(vcypher,key,iv,true,false);
+
+   std::cout << "resultDecrypt size = " << resultDecrypt.size() << std::endl;
+   
+   REQUIRE(data == resultDecrypt);
 }
 
-TEST_CASE("CryptoTest:  Test_AESDecrypt_ECB_NOPadding")
+/*
+TEST_CASE("CryptoTest:  Test_AESDecrypt_CBC_NOPadding")
 {
    Crypto crypto;
 
@@ -118,7 +125,6 @@ TEST_CASE("CryptoTest:  Test_AESDecrypt_ECB_NOPadding")
    vbyte iv = chelper::HexToBytes(chelper::ASCIIToHexString("1234567812345678"));
    assert(iv.size() == 16); // 16 bytes is AES block (both CBC and CFB)
    vbyte data = libcrypton::chelper::HexToBytes("07c748cf7d326782f82e60ebe60e2fac289e84e9ce91c1bc41565d14ecb5364073f28c9aa7bd6b069e44d8a97beb2b58");
-   
    vbyte result = chelper::HexToBytes(chelper::ASCIIToHexString("00000000000000000000000000000000"));
    
    std::cout << "expected result size = " << result.size() << std::endl;
@@ -130,7 +136,7 @@ TEST_CASE("CryptoTest:  Test_AESDecrypt_ECB_NOPadding")
    std::cout << "result size = " << result.size() << std::endl;
 
    REQUIRE(out == result);
-}
+}*/
 
 TEST_CASE("CryptoTest:  Test_Hash256_Zero")
 {

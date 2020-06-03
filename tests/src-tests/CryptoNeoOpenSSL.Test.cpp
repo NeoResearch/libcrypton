@@ -50,13 +50,12 @@ TEST_CASE("CryptoTest:  Test_AES_Encrypt_Decrypt_CBC_NOPadding")
 
    REQUIRE(out == result);
 
-   vbyte resultDecrypt = crypto.AESDecrypt(result,key,iv,false,false);
+   vbyte resultDecrypt = crypto.AESDecrypt(result, key, iv, false, false);
 
    std::cout << "resultDecrypt size = " << resultDecrypt.size() << std::endl;
-   
+
    REQUIRE(data == resultDecrypt);
 }
-
 
 TEST_CASE("CryptoTest:  Test_AES_Encrypt_Decrypt_ECB_NOPadding")
 {
@@ -75,10 +74,10 @@ TEST_CASE("CryptoTest:  Test_AES_Encrypt_Decrypt_ECB_NOPadding")
 
    REQUIRE(out == result);
 
-   vbyte resultDecrypt = crypto.AESDecrypt(result,key, Crypto::NO_IV,false,true);
+   vbyte resultDecrypt = crypto.AESDecrypt(result, key, Crypto::NO_IV, false, true);
 
    std::cout << "resultDecrypt size = " << resultDecrypt.size() << std::endl;
-   
+
    REQUIRE(data == resultDecrypt);
 }
 
@@ -86,22 +85,21 @@ TEST_CASE("CryptoTest:  Test_AES_Encrypt_Decrypt_Example_OpenSSL_Padding_CBC")
 {
    Crypto crypto;
 
-   // A 256 bit key 
+   // A 256 bit key
    std::string str_key = "01234567890123456789012345678901";
 
-   // A 128 bit IV 
+   // A 128 bit IV
    std::string str_iv = "0123456789012345";
 
-   // Message to be encrypted 
+   // Message to be encrypted
    std::string str_plaintext = "The quick brown fox jumps over the lazy dog";
-        
+
    vbyte data = chelper::HexToBytes(chelper::ASCIIToHexString(str_plaintext));
    vbyte key = chelper::HexToBytes(chelper::ASCIIToHexString(str_key));
    vbyte iv = chelper::HexToBytes(chelper::ASCIIToHexString(str_iv));
    assert(iv.size() == 16); // 16 bytes is AES block (both CBC and CFB)
 
-   vbyte vcypher = crypto.AESEncrypt(data,key,iv,true,false);
-
+   vbyte vcypher = crypto.AESEncrypt(data, key, iv, true, false);
 
    vbyte result = libcrypton::chelper::HexToBytes("e06f63a711e8b7aa9f9440107d4680a117994380ea31d2a299b95302d439b9702c8e65a99236ec920704915cf1a98a44");
    // 0000 - e0 6f 63 a7 11 e8 b7 aa-9f 94 40 10 7d 46 80 a1   .oc.......@.}F..
@@ -115,13 +113,13 @@ TEST_CASE("CryptoTest:  Test_AES_Encrypt_Decrypt_Example_OpenSSL_Padding_CBC")
    //std::cout << "out size = " << out.size() << std::endl;
 
    std::cout << "result size = " << result.size() << std::endl;
-   
+
    REQUIRE(vcypher == result);
 
-   vbyte resultDecrypt = crypto.AESDecrypt(vcypher,key,iv,true,false);
+   vbyte resultDecrypt = crypto.AESDecrypt(vcypher, key, iv, true, false);
 
    std::cout << "resultDecrypt size = " << resultDecrypt.size() << std::endl;
-   
+
    REQUIRE(data == resultDecrypt);
 }
 

@@ -189,16 +189,15 @@ TEST_CASE("CryptoTest:  Test_XOR")
 {
    Crypto crypto;
 
+   // just random strings with 'hello', some random internet example
    std::string s1 = "hello";
    vbyte v1 = chelper::HexToBytes(chelper::ASCIIToHexString(s1));
    vbyte v2 = { 0x89, 0x82, 0x0B, 0x4D, 0xED };
-
    vbyte v3 = crypto.XOR(v1, v2);
-
    vbyte vexpected = { 0xE1, 0xE7, 0x67, 0x21, 0x82 };
-
    REQUIRE(v3 == vexpected);
 
+   // practical testing with ones and zeroes
    vbyte vx_zero = { 0x00, 0x00, 0x00, 0x00 };
    vbyte vx_one = { 0xFF, 0xFF, 0xFF, 0xFF };
    vbyte vx1 = { 0x00, 0xFF, 0x00, 0xFF };

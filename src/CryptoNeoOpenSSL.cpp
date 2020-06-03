@@ -59,7 +59,7 @@ lComputeRIPEMD160(const byte* data, int32 length, byte* output);
 int
 lAESEncrypt(const byte* plaintext, int32 plaintext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* ciphertext, int32 outlength, bool padding, bool ecb);
 int
-lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* plaintext, int32 plaintext_len, bool padding);
+lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* plaintext, int32 plaintext_len, bool padding, bool ecb);
 
 
 void
@@ -304,7 +304,7 @@ Crypto::AESDecrypt(const vbyte& cyphertext, const vbyte& key, vbyte& iv, bool pa
    int plaintextsize = encslength; // TODO: verify this!
    vbyte voutput(plaintextsize, 0x00);
 
-   int real_size = lAESDecrypt(cyphertext.data(), cyphertext.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size(), padding);
+   int real_size = lAESDecrypt(cyphertext.data(), cyphertext.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size(), padding, ecb);
    std::cout << "given size: " << voutput.size() << " out_size=" << real_size << std::endl;
    vbyte realout(voutput.begin(), voutput.begin()+real_size);
    //assert(voutput.size() == real_size);
@@ -856,7 +856,7 @@ lAESEncrypt(const byte* plaintext, int32 plaintext_len, const byte* key, int32 k
 }
 
 int
-lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* plaintext, int32 plaintext_len, bool padding)
+lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* plaintext, int32 plaintext_len, bool padding, bool ecb)
 {
    // https://wiki.openssl.org/index.php/EVP_Symmetric_Encryption_and_Decryption#Padding
 
@@ -875,10 +875,32 @@ lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32
      * IV size for *most* modes is the same as the block size. For AES this
      * is 128 bits
      */
-   if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+   if(ecb)
+   {
+      std::cout << "MODE ECB: " << ecb << std::endl;
+      int result;
+      switch(keylength)
+      {
+         case 32:
+            result = EVP_DecryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, key, NULL);
+         case 16:
+            result = EVP_DecryptInit_ex(ctx, EVP_aes_128_ecb(), NULL, key, NULL);
+      }
+      if (1 != result)
+         handleErrors();
+   } else
+   {
+      std::cout << "MODE ECB: " << ecb << std::endl;
+      assert(keylength == 32);
+      assert(keylength * 8 == 256);
+      assert(AES_BLOCK_SIZE == 16);
+      assert(ivlength == AES_BLOCK_SIZE);
+      if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
       handleErrors();
+   }  
 
    if (!padding) {
+      assert(plaintext_len % 16 == 0); // assert that input is multiply since no padding
       // disable padding
       if (1 != EVP_CIPHER_CTX_set_padding(ctx, 0))
          handleErrors();

@@ -918,7 +918,6 @@ lAESCbcEncrypt256NoPadding(const byte* plaintext, int32 plaintext_len, const byt
       assert(keylength == 32);
       assert(keylength * 8 == 256);
       assert(AES_BLOCK_SIZE == 16);
-      //assert(plaintext_len % 16 == 0); // TODO: do we need this check??
       assert(ivlength == AES_BLOCK_SIZE);
       if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
       handleErrors();
@@ -926,6 +925,7 @@ lAESCbcEncrypt256NoPadding(const byte* plaintext, int32 plaintext_len, const byt
    
 
    if (!padding) {
+      assert(plaintext_len % 16 == 0); // assert that input is multiply since no padding
       // disable padding
       if (1 != EVP_CIPHER_CTX_set_padding(ctx, 0))
          handleErrors();

@@ -64,20 +64,18 @@ TEST_CASE("CryptoTest:  Test_AES_Encrypt_Decrypt_ECB_NOPadding")
 
    vbyte data = chelper::HexToBytes(chelper::ASCIIToHexString("00000000000000000000000000000000"));
    vbyte key = chelper::HexToBytes(chelper::ASCIIToHexString("1234567812345678"));
-   vbyte iv = chelper::HexToBytes(chelper::ASCIIToHexString(""));
    vbyte result = libcrypton::chelper::HexToBytes("f69e0923d8247eef417d6a78944a4b39f69e0923d8247eef417d6a78944a4b39");
 
    std::cout << "message size = " << data.size() << std::endl;
    std::cout << "key size = " << key.size() << std::endl;
-   std::cout << "iv size = " << iv.size() << std::endl;
-   vbyte out = crypto.AESEncrypt(data, key, iv, false, true);
+   vbyte out = crypto.AESEncrypt(data, key, Crypto::NO_IV, false, true);
    std::cout << "out size = " << out.size() << std::endl;
 
    std::cout << "result size = " << result.size() << std::endl;
 
    REQUIRE(out == result);
 
-   vbyte resultDecrypt = crypto.AESDecrypt(result,key,iv,false,true);
+   vbyte resultDecrypt = crypto.AESDecrypt(result,key, Crypto::NO_IV,false,true);
 
    std::cout << "resultDecrypt size = " << resultDecrypt.size() << std::endl;
    

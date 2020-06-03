@@ -20,6 +20,8 @@
 using namespace libcrypton;
 //using namespace std; // do not use
 
+vbyte Crypto::NO_IV = vbyte{}; // empty array representing NO_IV
+
 // first thing, declare private static variable _crypto
 ICrypto* Crypto::_crypto = nullptr;
 

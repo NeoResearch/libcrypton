@@ -127,7 +127,9 @@ public:
    vbyte Sha3NIST(const vbyte& message) const;
 
    ///vbyte RandBytes(int count); // generate random bytes, used for private applications
-};
+
+   static vbyte NO_IV;
+}; // class Crypto
 //
 } // namespace libcrypton
 

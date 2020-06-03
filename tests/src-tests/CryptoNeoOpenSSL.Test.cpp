@@ -208,4 +208,7 @@ TEST_CASE("CryptoTest:  Test_XOR")
    REQUIRE(crypto.XOR(vx2, vx2) == vx_zero);
    REQUIRE(crypto.XOR(vx_one, vx_one) == vx_zero);
    REQUIRE(crypto.XOR(vx_zero, vx_zero) == vx_zero);
+
+   // single 10101010 (0xAA) with 00000101 (0x05) -> 10101111 (0xAF)
+   REQUIRE(crypto.XOR(vbyte{ 0xAA }, vbyte{ 0x05 }) == vbyte{ 0xAF });
 }

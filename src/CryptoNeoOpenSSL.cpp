@@ -35,6 +35,12 @@ static const int32 RIPEMD160_LENGTH = 20;
 static const int32 HASH160_LENGTH = RIPEMD160_LENGTH;
 static const int32 HASH256_LENGTH = SHA256_LENGTH;
 
+void
+handleErrors()
+{
+   CRYPTON_EXCEPTION("ERROR IN libcrypton!");
+}
+
 // Methods
 
 void
@@ -49,6 +55,8 @@ void
 lComputeRIPEMD160(const byte* data, int32 length, byte* output);
 void
 lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key, int32 keylength, byte* iv_enc, int32 ivlength, byte* enc_out, int32 outlength);
+int
+lAESCbcEncrypt256NoPadding(const byte* plaintext, int32 plaintext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* ciphertext, int32 outlength);
 
 void
 lComputeSHA3OpenSSL(const unsigned char* message, size_t message_len, unsigned char** digest, unsigned int* digest_len);
@@ -272,10 +280,20 @@ Crypto::RIPEMD160(const vbyte& message) const
 vbyte
 Crypto::AESCbcEncrypt256(const vbyte& message, const vbyte& key, vbyte& iv) const
 {
+   const size_t encslength = ((message.size() + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+   // may have extra padding block
+   vbyte voutput(encslength, 0x00);
+   lAESCbcEncrypt256(message.data(), message.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size());
+   return voutput;
+}
+
+vbyte
+Crypto::AESCbcEncrypt256NoPadding(const vbyte& message, const vbyte& key, vbyte& iv) const
+{
    const size_t encslength = ((message.size() + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
    // -1 requires NO PADDING
    vbyte voutput(encslength, 0x00);
-   lAESCbcEncrypt256(message.data(), message.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size());
+   lAESCbcEncrypt256NoPadding(message.data(), message.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size());
    return voutput;
 }
 
@@ -718,13 +736,11 @@ lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key
    std::cout << "outlength: " << outlength << std::endl;
    std::cout << "AES_BLOCK_SIZE: " << AES_BLOCK_SIZE << std::endl;
 
-   //const size_t encslength = ((inputslength + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
-
-   const size_t encslength = ((inputslength + (AES_BLOCK_SIZE - 1)) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
-
+   const size_t encslength = ((inputslength + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
 
    // ===========================================================
    // See -1 (in 'AES_BLOCK_SIZE - 1')... NO PADDING.. may be necessary in some situations!
+   // DO NOT DO THAT!
    //
    // https://stackoverflow.com/questions/18152913/aes-aes-cbc-128-aes-cbc-192-aes-cbc-256-encryption-decryption-with-openssl-c/18158278
    /*
@@ -793,6 +809,117 @@ lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key
    //hex_print(dec_out, sizeof(dec_out));
 }
 
+int
+lAESCbcEncrypt256NoPadding(const byte* plaintext, int32 plaintext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* ciphertext, int32 outlength)
+{
+   std::cout << "inputs length: " << plaintext_len << std::endl;
+   std::cout << "keylength: " << keylength << std::endl;
+   std::cout << "ivlength: " << ivlength << std::endl;
+   std::cout << "outlength: " << outlength << std::endl;
+   std::cout << "AES_BLOCK_SIZE: " << AES_BLOCK_SIZE << std::endl;
+
+   const size_t encslength = ((plaintext_len + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+
+   // ===========================================================
+   // See -1 (in 'AES_BLOCK_SIZE - 1')... NO PADDING.. may be necessary in some situations!
+   // DO NOT DO THAT!
+   //
+   // https://stackoverflow.com/questions/18152913/aes-aes-cbc-128-aes-cbc-192-aes-cbc-256-encryption-decryption-with-openssl-c/18158278
+   /*
+   @Puffin that is NOT correct. There must be room for up to one full block of padding. 
+   That's how PKCS#5 padding works. Anything that "works" for you without taking that case into 
+   account does so only because the plaintext being encrypted is not an exact multiple 
+   of the AES block size (16 bytes), and is consequently a ticking time bomb for when that 
+   case eventually arrises. See PKCS5/7 padding here, and specifically, the paragraph describing 
+   what happens when an exact block-size multiple is encountered. 
+   */
+   // ===========================================================
+   //
+   // TODO: use methods with EVP prefix to avoid padding (explicitly)
+   // No padding leaks info on size.
+   // https://stackoverflow.com/questions/20000749/aes-encryption-of-16-bytes-without-padding
+   /*
+   So your steps are:
+    Call EVP_CIPHER_CTX_new to create a context
+    Call EVP_EncryptInit_ex with the context
+    Call EVP_CIPHER_CTX_set_padding on the context
+    Call EVP_EncryptUpdate_ex to encrypt the data
+    Call EVP_EncryptFinal_ex to retrieve the cipher text
+   */
+   // https://wiki.openssl.org/index.php/EVP_Symmetric_Encryption_and_Decryption
+   // ===========================================================
+
+   std::cout << "encslength: " << encslength << std::endl;
+
+   assert(keylength == 32);
+   assert(keylength * 8 == 256);
+   assert(AES_BLOCK_SIZE == 16);
+   assert(ivlength == AES_BLOCK_SIZE);
+   assert(plaintext_len % 16 == 0);
+
+   /* generate input with a given length */
+   //unsigned char aes_input[inputslength];
+   //memset(aes_input, 'X', inputslength);
+
+   /* init vector */
+   //unsigned char iv_enc[AES_BLOCK_SIZE];
+   //unsigned char iv_dec[AES_BLOCK_SIZE];
+   //RAND_bytes(iv_enc, AES_BLOCK_SIZE);
+   //memcpy(iv_dec, iv_enc, AES_BLOCK_SIZE);
+
+   // buffers for encryption and decryption
+   //unsigned char enc_out[encslength];
+   //unsigned char dec_out[inputslength];
+   //memset(enc_out, 0, sizeof(enc_out));
+
+   //memset(dec_out, 0, sizeof(dec_out));
+
+   EVP_CIPHER_CTX* ctx;
+
+   int len;
+
+   int ciphertext_len;
+
+   /* Create and initialise the context */
+   if (!(ctx = EVP_CIPHER_CTX_new()))
+      handleErrors();
+
+   /*
+     * Initialise the encryption operation. IMPORTANT - ensure you use a key
+     * and IV size appropriate for your cipher
+     * In this example we are using 256 bit AES (i.e. a 256 bit key). The
+     * IV size for *most* modes is the same as the block size. For AES this
+     * is 128 bits
+     */
+   if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+      handleErrors();
+
+   if (1 != EVP_CIPHER_CTX_set_padding(ctx, 0)) // disable padding
+      handleErrors();
+
+   /*
+     * Provide the message to be encrypted, and obtain the encrypted output.
+     * EVP_EncryptUpdate can be called multiple times if necessary
+     */
+   if (1 != EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
+      handleErrors();
+   ciphertext_len = len;
+
+   /*
+     * Finalise the encryption. Further ciphertext bytes may be written at
+     * this stage.
+     */
+   if (1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len))
+      handleErrors();
+   ciphertext_len += len;
+
+   /* Clean up */
+   EVP_CIPHER_CTX_free(ctx);
+
+   std::cout << "USED: " << ciphertext_len << std::endl;
+   return ciphertext_len;
+}
+
 void
 lComputeHash256(const byte* data, int32 length, byte* output)
 {
@@ -825,12 +952,6 @@ lComputeSHA256(const byte* data, int32 length, byte* output)
    SHA256_Update(&c, data, length);
    SHA256_Final(output, &c);
    OPENSSL_cleanse(&c, sizeof(c));
-}
-
-void
-handleErrors()
-{
-   CRYPTON_EXCEPTION("ERROR IN SHA3!");
 }
 
 void

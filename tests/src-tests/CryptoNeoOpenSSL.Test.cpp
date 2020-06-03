@@ -43,7 +43,7 @@ TEST_CASE("CryptoTest:  Test_AESCbcEncrypt256_10_0x58")
    std::cout << "message size = " << data.size() << std::endl;
    std::cout << "key size = " << key.size() << std::endl;
    std::cout << "iv size = " << iv.size() << std::endl;
-   vbyte out = crypto.AESCbcEncrypt256(data,key,iv);
+   vbyte out = crypto.AESCbcEncrypt256NoPadding(data,key,iv);
    std::cout << "out size = " << out.size() << std::endl;
 
    std::cout << "result size = " << result.size() << std::endl;

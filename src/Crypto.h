@@ -81,6 +81,16 @@ public:
 
    vbyte AESDecrypt(const vbyte& message, const vbyte& key, const vbyte& iv, bool padding, bool ecb) const;
 
+   vbyte XOR(const vbyte& v1, const vbyte& v2) const
+   {
+      vbyte vout(v1.size(), 0x00);
+      if(v1.size() != v2.size())
+         return vbyte{}; // empty
+      for(unsigned i=0; i<v1.size(); i++)
+         vout[i] = v1[i] ^ v2[i];
+      return vout;
+   }
+
    vbyte Sign(const vbyte& message, const vbyte& privkey, const vbyte& pubkey) const
    {
       return SignData(Sha256(message), privkey, pubkey);

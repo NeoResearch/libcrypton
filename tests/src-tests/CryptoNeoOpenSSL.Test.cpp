@@ -184,3 +184,18 @@ TEST_CASE("CryptoTest:  Test_GeneratePublicKey")
    // less than 0% failures
    REQUIRE(countFail / MAX_EXEC <= 0.00);
 }
+
+TEST_CASE("CryptoTest:  Test_XOR")
+{
+   Crypto crypto;
+
+   std::string s1 = "hello";
+   vbyte v1 = chelper::HexToBytes(chelper::ASCIIToHexString(s1));
+   vbyte v2 = { 0x89, 0x82, 0x0B, 0x4D, 0xED };
+
+   vbyte v3 = crypto.XOR(v1, v2);
+
+   vbyte vexpected = { 0xE1, 0xE7, 0x67, 0x21, 0x82 };
+
+   REQUIRE(v3 == vexpected);
+}

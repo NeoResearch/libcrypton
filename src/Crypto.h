@@ -1,5 +1,5 @@
-#ifndef CRYPTO_H
-#define CRYPTO_H
+#ifndef LIBCRYPTON_CRYPTO_H
+#define LIBCRYPTON_CRYPTO_H
 
 // WARNING: do not include .hpp here, or things may break!
 
@@ -60,6 +60,23 @@ public:
    // RIPEMD160
    vbyte RIPEMD160(const vbyte& message) const;
 
+   // =================================================
+   // We support two modes of AES:
+   //    https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation
+   // =================================================
+   // - Electronic codebook (ECB)
+   // - Cipher block chaining (CBC)
+   // =================================================
+   // We also support Padding or NoPadding strategies
+   // =================================================
+   // CBC mode requires an Initialization Vector (IV)
+   // - It is important that an initialization vector is never reused under the same key.
+   // - It can be public.
+   // - In CBC mode, the IV must, in addition, be unpredictable at encryption time.
+   // =================================================
+   // ECB does not require an Initialization Vector (thus pass an empty 'vbyte')
+   // =================================================
+
    vbyte AESEncrypt(const vbyte& message, const vbyte& key, const vbyte& iv, bool padding, bool ecb) const;
 
    vbyte AESDecrypt(const vbyte& message, const vbyte& key, const vbyte& iv, bool padding, bool ecb) const;
@@ -111,6 +128,7 @@ public:
 
    ///vbyte RandBytes(int count); // generate random bytes, used for private applications
 };
-}
+//
+} // namespace libcrypton
 
-#endif
+#endif // LIBCRYPTON_CRYPTO_H

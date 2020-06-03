@@ -3,12 +3,13 @@ OPENSSL_PATH=./build/openssl
 # src
 SRC_PATH=./src
 
+TP_PATH=./thirdparty
 
 all: bin/crypdev
 
-bin/crypdev: src/crypdev.cpp src/ModuleCryptoDev.hpp
+bin/crypdev: src/crypdev.cpp src/ModuleCryptoDev.hpp ./thirdparty/cryptopp/libcryptopp.a
 	g++ -Ofast --std=c++17 -I$(SRC_PATH) -I$(OPENSSL_PATH)/include -pthread $< -o  $@  $(SRC_PATH)/CryptoNeoOpenSSL.cpp  -L$(OPENSSL_PATH) -llinux-openssl-crypto-x86_64 -lpthread -ldl
-	g++ -Ofast --std=c++17 -I$(SRC_PATH) -I$(OPENSSL_PATH)/include -pthread $< -o  extra$@  $(SRC_PATH)/CryptoNeoOpenSSL.cpp $(SRC_PATH)/CryptoExtra.cpp $(SRC_PATH)/cryptopp/libcryptopp.a  -L$(OPENSSL_PATH) -llinux-openssl-crypto-x86_64 -lpthread -ldl
+	g++ -Ofast --std=c++17 -I$(SRC_PATH) -I$(OPENSSL_PATH)/include -I$(TP_PATH) -pthread $< -o  $@-extra  $(SRC_PATH)/CryptoNeoOpenSSL.cpp $(SRC_PATH)/CryptoExtra.cpp $(TP_PATH)/cryptopp/libcryptopp.a  -L$(OPENSSL_PATH) -llinux-openssl-crypto-x86_64 -lpthread -ldl
 
 vendor: get_submodules openssl cryptopp #clang gtests
 
@@ -47,3 +48,6 @@ cryptopp:
 
 test:
 	cd tests && make test
+
+clean:
+	rm -f bin/crypdev

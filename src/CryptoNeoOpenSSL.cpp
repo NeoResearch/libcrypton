@@ -294,7 +294,7 @@ Crypto::AESCbcEncrypt256(const vbyte& message, const vbyte& key, vbyte& iv) cons
 vbyte
 Crypto::AESEncrypt256NoPadding(const vbyte& message, const vbyte& key, vbyte& iv, bool ecb) const
 {
-   size_t encslength = ((message.size() + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+   const size_t encslength = ((message.size() + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
    // -1 requires NO PADDING
    vbyte voutput(encslength, 0x00);
    
@@ -920,7 +920,7 @@ lAESCbcEncrypt256NoPadding(const byte* plaintext, int32 plaintext_len, const byt
 
    if (!padding) {
       // disable padding
-      if (1 != EVP_CIPHER_CTX_set_padding(ctx, false))
+      if (1 != EVP_CIPHER_CTX_set_padding(ctx, 0))
          handleErrors();
    }
 

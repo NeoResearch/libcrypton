@@ -49,6 +49,12 @@ TEST_CASE("CryptoTest:  Test_AESEncrypt_CBC_NOPadding")
    std::cout << "result size = " << result.size() << std::endl;
 
    REQUIRE(out == result);
+
+   vbyte resultDecrypt = crypto.AESDecrypt(result,key,iv,false,false);
+
+   std::cout << "resultDecrypt size = " << resultDecrypt.size() << std::endl;
+   
+   REQUIRE(data == resultDecrypt);
 }
 
 
@@ -70,6 +76,12 @@ TEST_CASE("CryptoTest:  Test_AESEncrypt_ECB_NOPadding")
    std::cout << "result size = " << result.size() << std::endl;
 
    REQUIRE(out == result);
+
+   vbyte resultDecrypt = crypto.AESDecrypt(result,key,iv,false,true);
+
+   std::cout << "resultDecrypt size = " << resultDecrypt.size() << std::endl;
+   
+   REQUIRE(data == resultDecrypt);
 }
 
 TEST_CASE("CryptoTest:  Test_AESEncrypt_Example_OpenSSL_Padding_CBC")

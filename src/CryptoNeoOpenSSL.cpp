@@ -17,7 +17,6 @@
 
 #include <assert.h>
 
-
 using namespace libcrypton;
 //using namespace std; // do not use
 
@@ -60,7 +59,6 @@ int
 lAESEncrypt(const byte* plaintext, int32 plaintext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* ciphertext, int32 outlength, bool padding, bool ecb);
 int
 lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* plaintext, int32 plaintext_len, bool padding, bool ecb);
-
 
 void
 lComputeSHA3OpenSSL(const unsigned char* message, size_t message_len, unsigned char** digest, unsigned int* digest_len);
@@ -281,32 +279,63 @@ Crypto::RIPEMD160(const vbyte& message) const
    return voutput;
 }
 
+// =================================================
+// We support two modes of AES:
+//    https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation
+// =================================================
+// - Electronic codebook (ECB)
+// - Cipher block chaining (CBC)
+// =================================================
+// We also support Padding or NoPadding strategies
+// =================================================
+// CBC mode requires an Initialization Vector (IV)
+// - It is important that an initialization vector is never reused under the same key.
+// - It can be public.
+// - In CBC mode, the IV must, in addition, be unpredictable at encryption time.
+// =================================================
+// ECB does not require an Initialization Vector (thus pass an empty 'vbyte')
+// =================================================
+
 vbyte
-Crypto::AESEncrypt(const vbyte& message, const vbyte& key, vbyte& iv, bool padding, bool ecb) const
+Crypto::AESEncrypt(const vbyte& message, const vbyte& key, const vbyte& iv, bool padding, bool ecb) const
 {
-   //const size_t encslength = ((message.size() + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+   // must guarantee there's enough room for: 'message.size()' + cipher_block_size
+   //
    const size_t encslength = ((message.size() + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
-   // -1 requires NO PADDING
+   //
+   // Note that, when 'nopadding' option is activated, one would never use extra block (see example below)
+   //    const size_t encslength = ((message.size() + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+   //
+   // Anyway, we should guarantee enough space for both padding and nopadding modes, and we adjust real size after execution.
+   //
+   if (ecb && (iv.size() > 0))
+      return vbyte{}; // do not pass 'IV' to 'ECB' Mode.
+
    vbyte voutput(encslength, 0x00);
-   int real_size = lAESEncrypt(message.data(), message.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size(), padding, ecb);
+   int real_size = lAESEncrypt(message.data(), message.size(), key.data(), key.size(), (unsigned char*)iv.data(), iv.size(), voutput.data(), voutput.size(), padding, ecb);
    std::cout << "given size: " << voutput.size() << " out_size=" << real_size << std::endl;
-   vbyte realout(voutput.begin(), voutput.begin()+real_size);
+   vbyte realout(voutput.begin(), voutput.begin() + real_size);
    //assert(voutput.size() == real_size);
    return realout;
    //return voutput;
 }
 
 vbyte
-Crypto::AESDecrypt(const vbyte& cyphertext, const vbyte& key, vbyte& iv, bool padding, bool ecb) const
+Crypto::AESDecrypt(const vbyte& cyphertext, const vbyte& key, const vbyte& iv, bool padding, bool ecb) const
 {
-   const size_t encslength = ((cyphertext.size() + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
-
-   int plaintextsize = encslength; // TODO: verify this!
+   // must guarantee there's enough room for: 'cyphertext.size()' + cipher_block_size
+   // https://www.openssl.org/docs/man1.1.1/man3/EVP_DecryptUpdate.html
+   //
+   const size_t plaintextsize = ((cyphertext.size() + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+   //
    vbyte voutput(plaintextsize, 0x00);
+   //
+   if (ecb && (iv.size() > 0))
+      return vbyte{}; // do not pass 'IV' to 'ECB' Mode.
 
-   int real_size = lAESDecrypt(cyphertext.data(), cyphertext.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size(), padding, ecb);
+   int real_size = lAESDecrypt(cyphertext.data(), cyphertext.size(), key.data(), key.size(), (unsigned char*)iv.data(), iv.size(), voutput.data(), voutput.size(), padding, ecb);
    std::cout << "given size: " << voutput.size() << " out_size=" << real_size << std::endl;
-   vbyte realout(voutput.begin(), voutput.begin()+real_size);
+   vbyte realout(voutput.begin(), voutput.begin() + real_size);
    //assert(voutput.size() == real_size);
    return realout;
 }
@@ -800,12 +829,10 @@ lAESEncrypt(const byte* plaintext, int32 plaintext_len, const byte* key, int32 k
      * IV size for *most* modes is the same as the block size. For AES this
      * is 128 bits
      */
-   if(ecb)
-   {
+   if (ecb) {
       std::cout << "MODE ECB: " << ecb << std::endl;
       int result;
-      switch(keylength)
-      {
+      switch (keylength) {
          case 32:
             result = EVP_EncryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, key, NULL);
          case 16:
@@ -813,17 +840,15 @@ lAESEncrypt(const byte* plaintext, int32 plaintext_len, const byte* key, int32 k
       }
       if (1 != result)
          handleErrors();
-   } else
-   {
+   } else {
       std::cout << "MODE CBC: " << !ecb << std::endl;
       assert(keylength == 32);
       assert(keylength * 8 == 256);
       assert(AES_BLOCK_SIZE == 16);
       assert(ivlength == AES_BLOCK_SIZE);
       if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
-      handleErrors();
-   }   
-   
+         handleErrors();
+   }
 
    if (!padding) {
       assert(plaintext_len % 16 == 0); // assert that input is multiply since no padding
@@ -875,12 +900,10 @@ lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32
      * IV size for *most* modes is the same as the block size. For AES this
      * is 128 bits
      */
-   if(ecb)
-   {
+   if (ecb) {
       std::cout << "MODE ECB: " << ecb << std::endl;
       int result;
-      switch(keylength)
-      {
+      switch (keylength) {
          case 32:
             result = EVP_DecryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, key, NULL);
          case 16:
@@ -888,16 +911,15 @@ lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32
       }
       if (1 != result)
          handleErrors();
-   } else
-   {
+   } else {
       std::cout << "MODE ECB: " << ecb << std::endl;
       assert(keylength == 32);
       assert(keylength * 8 == 256);
       assert(AES_BLOCK_SIZE == 16);
       assert(ivlength == AES_BLOCK_SIZE);
       if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
-      handleErrors();
-   }  
+         handleErrors();
+   }
 
    if (!padding) {
       assert(plaintext_len % 16 == 0); // assert that input is multiply since no padding

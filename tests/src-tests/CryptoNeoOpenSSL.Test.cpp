@@ -72,7 +72,7 @@ TEST_CASE("CryptoTest:  Test_AESEbcEncrypt256_10_0x58")
    REQUIRE(out == result);
 }
 
-/*
+
 TEST_CASE("CryptoTest:  Test_AESCbcEncryptDecrypt256_Example_OpenSSL")
 {
    Crypto crypto;
@@ -109,7 +109,7 @@ TEST_CASE("CryptoTest:  Test_AESCbcEncryptDecrypt256_Example_OpenSSL")
    
    REQUIRE(vcypher == result);
 }
-*/
+
 
 TEST_CASE("CryptoTest:  Test_Hash256_Zero")
 {

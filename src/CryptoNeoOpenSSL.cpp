@@ -15,6 +15,9 @@
 
 #include <openssl/rand.h>
 
+#include <assert.h>
+
+
 using namespace libcrypton;
 //using namespace std; // do not use
 
@@ -294,13 +297,18 @@ Crypto::AESCbcEncrypt256(const vbyte& message, const vbyte& key, vbyte& iv) cons
 vbyte
 Crypto::AESEncrypt256NoPadding(const vbyte& message, const vbyte& key, vbyte& iv, bool ecb) const
 {
-   const size_t encslength = ((message.size() + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+   //const size_t encslength = ((message.size() + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+   const size_t encslength = ((message.size() + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
    // -1 requires NO PADDING
    vbyte voutput(encslength, 0x00);
    
    bool padding = false;
-   lAESCbcEncrypt256NoPadding(message.data(), message.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size(), padding, ecb);
-   return voutput;
+   int real_size = lAESCbcEncrypt256NoPadding(message.data(), message.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size(), padding, ecb);
+   std::cout << "given size: " << voutput.size() << " out_size=" << real_size << std::endl;
+   vbyte realout(voutput.begin(), voutput.begin()+real_size);
+   //assert(voutput.size() == real_size);
+   return realout;
+   //return voutput;
 }
 
 vbyte
@@ -839,7 +847,8 @@ lAESCbcEncrypt256NoPadding(const byte* plaintext, int32 plaintext_len, const byt
 {
    std::cout << "" << std::endl;
    std::cout << "inputs length: " << plaintext_len << std::endl;
-   std::cout << "plaintext: " << plaintext << std::endl;
+   std::string strplain((char*)plaintext, plaintext_len);
+   std::cout << "plaintext: '" << strplain << "'" << std::endl;
    std::cout << "keylength: " << keylength << std::endl;
    std::cout << "ivlength: " << ivlength << std::endl;
    std::cout << "outlength: " << outlength << std::endl;
@@ -911,7 +920,7 @@ lAESCbcEncrypt256NoPadding(const byte* plaintext, int32 plaintext_len, const byt
       assert(keylength == 32);
       assert(keylength * 8 == 256);
       assert(AES_BLOCK_SIZE == 16);
-      assert(plaintext_len % 16 == 0); // TODO: do we need this check??
+      //assert(plaintext_len % 16 == 0); // TODO: do we need this check??
       assert(ivlength == AES_BLOCK_SIZE);
       if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
       handleErrors();

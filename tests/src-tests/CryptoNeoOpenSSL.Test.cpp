@@ -37,11 +37,20 @@ TEST_CASE("CryptoTest:  Test_AESCbcEncrypt256_10_0x58")
    vbyte data = chelper::HexToBytes(chelper::ASCIIToHexString("00000000000000000000000000000000"));
    vbyte key = chelper::HexToBytes(chelper::ASCIIToHexString("12345678123456781234567812345678"));
    vbyte iv = chelper::HexToBytes(chelper::ASCIIToHexString("1234567812345678"));
-   assert(iv.size() == 16);
+   assert(iv.size() == 16); // 16 bytes is AES block (both CBC and CFB)
    vbyte result = libcrypton::chelper::HexToBytes("07c748cf7d326782f82e60ebe60e2fac289e84e9ce91c1bc41565d14ecb53640");
+
+   std::cout << "message size = " << data.size() << std::endl;
+   std::cout << "key size = " << key.size() << std::endl;
+   std::cout << "iv size = " << iv.size() << std::endl;
+   vbyte out = crypto.AESCbcEncrypt256(data,key,iv);
+   std::cout << "out size = " << out.size() << std::endl;
+
+   std::cout << "result size = " << result.size() << std::endl;
    
-   REQUIRE(crypto.AESCbcEncrypt256(data,key,iv) == result);
+   REQUIRE(out == result);
 }
+
 
 TEST_CASE("CryptoTest:  Test_Hash256_Zero")
 {

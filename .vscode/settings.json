@@ -15,6 +15,7 @@
         "libopenssl/**": true
     },
     "files.associations": {
-        "initializer_list": "cpp"
+        "initializer_list": "cpp",
+        "ostream": "cpp"
     }
 }

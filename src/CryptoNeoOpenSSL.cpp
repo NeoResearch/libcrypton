@@ -13,8 +13,6 @@
 
 #include <iostream>
 
-
-
 #include <openssl/rand.h>
 
 using namespace libcrypton;
@@ -51,7 +49,7 @@ void
 lComputeRIPEMD160(const byte* data, int32 length, byte* output);
 void
 lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key, int32 keylength, byte* iv_enc, int32 ivlength, byte* enc_out, int32 outlength);
-   
+
 void
 lComputeSHA3OpenSSL(const unsigned char* message, size_t message_len, unsigned char** digest, unsigned int* digest_len);
 
@@ -274,12 +272,12 @@ Crypto::RIPEMD160(const vbyte& message) const
 vbyte
 Crypto::AESCbcEncrypt256(const vbyte& message, const vbyte& key, vbyte& iv) const
 {
-   const size_t encslength = ((message.size() + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+   const size_t encslength = ((message.size() + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+   // -1 requires NO PADDING
    vbyte voutput(encslength, 0x00);
    lAESCbcEncrypt256(message.data(), message.size(), key.data(), key.size(), iv.data(), iv.size(), voutput.data(), voutput.size());
    return voutput;
 }
-
 
 // message is already received as a SHA256 digest
 // TODO: better to receive pubkey in general format or specific ECPoint(X,Y) ?
@@ -606,8 +604,7 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
    vbyte newPub = GetPublicKeyFromPrivateKey(vpriv, true);
    if (newPub == vpubkey)
       return vpriv; // all is fine!
-   else
-   {
+   else {
       std::cout << "WARNING: verify when getpubkey is eventually not same as gen keypair on openssl" << std::endl;
       return GenerateKeyPair(vpubkey); // try again!
    }
@@ -698,18 +695,18 @@ lComputeRIPEMD160(const byte* data, int32 length, byte* output)
    OPENSSL_cleanse(&c, sizeof(c));
 }
 
-static void hex_print(const void* pv, size_t len)
+static void
+hex_print(const void* pv, size_t len)
 {
-    const unsigned char * p = (const unsigned char*)pv;
-    if (NULL == pv)
-        printf("NULL");
-    else
-    {
-        size_t i = 0;
-        for (; i<len;++i)
-            printf("%02X ", *p++);
-    }
-    printf("\n");
+   const unsigned char* p = (const unsigned char*)pv;
+   if (NULL == pv)
+      printf("NULL");
+   else {
+      size_t i = 0;
+      for (; i < len; ++i)
+         printf("%02X ", *p++);
+   }
+   printf("\n");
 }
 
 void
@@ -721,46 +718,65 @@ lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key
    std::cout << "outlength: " << outlength << std::endl;
    std::cout << "AES_BLOCK_SIZE: " << AES_BLOCK_SIZE << std::endl;
 
+   //const size_t encslength = ((inputslength + AES_BLOCK_SIZE) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+
+   const size_t encslength = ((inputslength + (AES_BLOCK_SIZE - 1)) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+
+
+   // ===========================================================
+   // See -1 (in 'AES_BLOCK_SIZE - 1')... NO PADDING.. may be necessary in some situations!
+   //
+   // https://stackoverflow.com/questions/18152913/aes-aes-cbc-128-aes-cbc-192-aes-cbc-256-encryption-decryption-with-openssl-c/18158278
+   /*
+   @Puffin that is NOT correct. There must be room for up to one full block of padding. 
+   That's how PKCS#5 padding works. Anything that "works" for you without taking that case into 
+   account does so only because the plaintext being encrypted is not an exact multiple 
+   of the AES block size (16 bytes), and is consequently a ticking time bomb for when that 
+   case eventually arrises. See PKCS5/7 padding here, and specifically, the paragraph describing 
+   what happens when an exact block-size multiple is encountered. 
+   */
+   // ===========================================================
+
+   std::cout << "encslength: " << encslength << std::endl;
+
    assert(keylength == 32);
-   assert(keylength*8 == 256);
+   assert(keylength * 8 == 256);
    assert(AES_BLOCK_SIZE == 16);
    assert(ivlength == AES_BLOCK_SIZE);
    assert(inputslength % 16 == 0);
-   
 
-    /* generate input with a given length */
-    //unsigned char aes_input[inputslength];
-    //memset(aes_input, 'X', inputslength);
+   /* generate input with a given length */
+   //unsigned char aes_input[inputslength];
+   //memset(aes_input, 'X', inputslength);
 
-    /* init vector */
-    //unsigned char iv_enc[AES_BLOCK_SIZE];
-    //unsigned char iv_dec[AES_BLOCK_SIZE];
-    //RAND_bytes(iv_enc, AES_BLOCK_SIZE);
-    //memcpy(iv_dec, iv_enc, AES_BLOCK_SIZE);
+   /* init vector */
+   //unsigned char iv_enc[AES_BLOCK_SIZE];
+   //unsigned char iv_dec[AES_BLOCK_SIZE];
+   //RAND_bytes(iv_enc, AES_BLOCK_SIZE);
+   //memcpy(iv_dec, iv_enc, AES_BLOCK_SIZE);
 
-    // buffers for encryption and decryption
-    //unsigned char enc_out[encslength];
-    //unsigned char dec_out[inputslength];
-    //memset(enc_out, 0, sizeof(enc_out));
-    
-    //memset(dec_out, 0, sizeof(dec_out));
+   // buffers for encryption and decryption
+   //unsigned char enc_out[encslength];
+   //unsigned char dec_out[inputslength];
+   //memset(enc_out, 0, sizeof(enc_out));
 
-    AES_KEY enc_key, dec_key;
-    AES_set_encrypt_key(aes_key, keylength*8, &enc_key);
-    AES_cbc_encrypt(aes_input, enc_out, inputslength, &enc_key, iv_enc, AES_ENCRYPT);
+   //memset(dec_out, 0, sizeof(dec_out));
 
-    //AES_set_decrypt_key(aes_key, keylength, &dec_key);
-    //AES_cbc_encrypt(enc_out, dec_out, outlength, &dec_key, iv_dec, AES_DECRYPT);
+   AES_KEY enc_key, dec_key;
+   AES_set_encrypt_key(aes_key, keylength * 8, &enc_key);
+   AES_cbc_encrypt(aes_input, enc_out, inputslength, &enc_key, iv_enc, AES_ENCRYPT);
 
+   //AES_set_decrypt_key(aes_key, keylength, &dec_key);
+   //AES_cbc_encrypt(enc_out, dec_out, outlength, &dec_key, iv_dec, AES_DECRYPT);
 
-    printf("original:\t");
-    hex_print(aes_input, sizeof(aes_input));
+   printf("original:\t");
+   hex_print(aes_input, sizeof(aes_input));
 
-    printf("encrypt:\t");
-    hex_print(enc_out, sizeof(enc_out));
+   printf("encrypt:\t");
+   hex_print(enc_out, sizeof(enc_out));
 
-    //printf("decrypt:\t");
-    //hex_print(dec_out, sizeof(dec_out));
+   //printf("decrypt:\t");
+   //hex_print(dec_out, sizeof(dec_out));
 }
 
 void

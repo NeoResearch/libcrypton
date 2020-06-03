@@ -43,7 +43,28 @@ TEST_CASE("CryptoTest:  Test_AESCbcEncrypt256_10_0x58")
    std::cout << "message size = " << data.size() << std::endl;
    std::cout << "key size = " << key.size() << std::endl;
    std::cout << "iv size = " << iv.size() << std::endl;
-   vbyte out = crypto.AESCbcEncrypt256NoPadding(data, key, iv);
+   vbyte out = crypto.AESEncrypt256NoPadding(data, key, iv, false);
+   std::cout << "out size = " << out.size() << std::endl;
+
+   std::cout << "result size = " << result.size() << std::endl;
+
+   REQUIRE(out == result);
+}
+
+
+TEST_CASE("CryptoTest:  Test_AESEbcEncrypt256_10_0x58")
+{
+   Crypto crypto;
+
+   vbyte data = chelper::HexToBytes(chelper::ASCIIToHexString("00000000000000000000000000000000"));
+   vbyte key = chelper::HexToBytes(chelper::ASCIIToHexString("1234567812345678"));
+   vbyte iv = chelper::HexToBytes(chelper::ASCIIToHexString(""));
+   vbyte result = libcrypton::chelper::HexToBytes("f69e0923d8247eef417d6a78944a4b39f69e0923d8247eef417d6a78944a4b39");
+
+   std::cout << "message size = " << data.size() << std::endl;
+   std::cout << "key size = " << key.size() << std::endl;
+   std::cout << "iv size = " << iv.size() << std::endl;
+   vbyte out = crypto.AESEncrypt256NoPadding(data, key, iv, true);
    std::cout << "out size = " << out.size() << std::endl;
 
    std::cout << "result size = " << result.size() << std::endl;
@@ -64,13 +85,13 @@ TEST_CASE("CryptoTest:  Test_AESCbcEncryptDecrypt256_Example_OpenSSL")
 
    // Message to be encrypted 
    std::string str_plaintext = "The quick brown fox jumps over the lazy dog";
-
+        
    vbyte data = chelper::HexToBytes(chelper::ASCIIToHexString(str_plaintext));
    vbyte key = chelper::HexToBytes(chelper::ASCIIToHexString(str_key));
    vbyte iv = chelper::HexToBytes(chelper::ASCIIToHexString(str_iv));
    assert(iv.size() == 16); // 16 bytes is AES block (both CBC and CFB)
 
-   vbyte vcypher = crypto.AESCbcEncrypt256NoPadding(data,key,iv);
+   vbyte vcypher = crypto.AESEncrypt256NoPadding(data,key,iv,false);
 
 
    vbyte result = libcrypton::chelper::HexToBytes("e06f63a711e8b7aa9f9440107d4680a117994380ea31d2a299b95302d439b9702c8e65a99236ec920704915cf1a98a44");

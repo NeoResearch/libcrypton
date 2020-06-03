@@ -60,11 +60,9 @@ public:
    // RIPEMD160
    vbyte RIPEMD160(const vbyte& message) const;
 
-   vbyte AESCbcEncrypt256(const vbyte& message, const vbyte& key, vbyte& iv) const;
+   vbyte AESEncrypt(const vbyte& message, const vbyte& key, vbyte& iv, bool padding, bool ecb) const;
 
-   vbyte AESEncrypt256NoPadding(const vbyte& message, const vbyte& key, vbyte& iv, bool padding, bool ecb) const;
-
-   vbyte AESCbcDecrypt256NoPadding(const vbyte& message, const vbyte& key, vbyte& iv) const;
+   vbyte AESDecrypt(const vbyte& message, const vbyte& key, vbyte& iv, bool padding, bool ecb) const;
 
    vbyte Sign(const vbyte& message, const vbyte& privkey, const vbyte& pubkey) const
    {

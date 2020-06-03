@@ -43,7 +43,7 @@ TEST_CASE("CryptoTest:  Test_AESCbcEncrypt256_10_0x58")
    std::cout << "message size = " << data.size() << std::endl;
    std::cout << "key size = " << key.size() << std::endl;
    std::cout << "iv size = " << iv.size() << std::endl;
-   vbyte out = crypto.AESEncrypt256NoPadding(data, key, iv, false, false);
+   vbyte out = crypto.AESEncrypt(data, key, iv, false, false);
    std::cout << "out size = " << out.size() << std::endl;
 
    std::cout << "result size = " << result.size() << std::endl;
@@ -64,7 +64,7 @@ TEST_CASE("CryptoTest:  Test_AESEbcEncrypt256_10_0x58")
    std::cout << "message size = " << data.size() << std::endl;
    std::cout << "key size = " << key.size() << std::endl;
    std::cout << "iv size = " << iv.size() << std::endl;
-   vbyte out = crypto.AESEncrypt256NoPadding(data, key, iv, false, true);
+   vbyte out = crypto.AESEncrypt(data, key, iv, false, true);
    std::cout << "out size = " << out.size() << std::endl;
 
    std::cout << "result size = " << result.size() << std::endl;
@@ -91,7 +91,7 @@ TEST_CASE("CryptoTest:  Test_AESCbcEncryptDecrypt256_Example_OpenSSL")
    vbyte iv = chelper::HexToBytes(chelper::ASCIIToHexString(str_iv));
    assert(iv.size() == 16); // 16 bytes is AES block (both CBC and CFB)
 
-   vbyte vcypher = crypto.AESEncrypt256NoPadding(data,key,iv,true,false);
+   vbyte vcypher = crypto.AESEncrypt(data,key,iv,true,false);
 
 
    vbyte result = libcrypton::chelper::HexToBytes("e06f63a711e8b7aa9f9440107d4680a117994380ea31d2a299b95302d439b9702c8e65a99236ec920704915cf1a98a44");

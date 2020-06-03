@@ -736,6 +736,20 @@ lAESCbcEncrypt256(const byte* aes_input, int32 inputslength, const byte* aes_key
    what happens when an exact block-size multiple is encountered. 
    */
    // ===========================================================
+   //
+   // TODO: use methods with EVP prefix to avoid padding (explicitly)
+   // No padding leaks info on size.
+   // https://stackoverflow.com/questions/20000749/aes-encryption-of-16-bytes-without-padding
+   /*
+   So your steps are:
+    Call EVP_CIPHER_CTX_new to create a context
+    Call EVP_EncryptInit_ex with the context
+    Call EVP_CIPHER_CTX_set_padding on the context
+    Call EVP_EncryptUpdate_ex to encrypt the data
+    Call EVP_EncryptFinal_ex to retrieve the cipher text
+   */
+   // https://wiki.openssl.org/index.php/EVP_Symmetric_Encryption_and_Decryption
+   // ===========================================================
 
    std::cout << "encslength: " << encslength << std::endl;
 

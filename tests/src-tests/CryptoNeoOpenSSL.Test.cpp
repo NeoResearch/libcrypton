@@ -198,4 +198,15 @@ TEST_CASE("CryptoTest:  Test_XOR")
    vbyte vexpected = { 0xE1, 0xE7, 0x67, 0x21, 0x82 };
 
    REQUIRE(v3 == vexpected);
+
+   vbyte vx_zero = { 0x00, 0x00, 0x00, 0x00 };
+   vbyte vx_one = { 0xFF, 0xFF, 0xFF, 0xFF };
+   vbyte vx1 = { 0x00, 0xFF, 0x00, 0xFF };
+   vbyte vx2 = { 0xFF, 0x00, 0xFF, 0x00 };
+
+   REQUIRE(crypto.XOR(vx1, vx2) == vx_one);
+   REQUIRE(crypto.XOR(vx1, vx1) == vx_zero);
+   REQUIRE(crypto.XOR(vx2, vx2) == vx_zero);
+   REQUIRE(crypto.XOR(vx_one, vx_one) == vx_zero);
+   REQUIRE(crypto.XOR(vx_zero, vx_zero) == vx_zero);
 }

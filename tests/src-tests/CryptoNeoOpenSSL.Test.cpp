@@ -212,3 +212,42 @@ TEST_CASE("CryptoTest:  Test_XOR")
    // single 10101010 (0xAA) with 00000101 (0x05) -> 10101111 (0xAF)
    REQUIRE(crypto.XOR(vbyte{ 0xAA }, vbyte{ 0x05 }) == vbyte{ 0xAF });
 }
+
+TEST_CASE("CryptoTest:  Test_SecureBytes")
+{
+   std::string abc = "abc";
+   libcrypton::SecureBytes sb{ std::move(abc) };
+   //
+   REQUIRE(sb.size() == 3);
+   REQUIRE(sb.at(0) == 'a');
+   REQUIRE(sb.at(1) == 'b');
+   REQUIRE(sb.at(2) == 'c');
+   //
+   REQUIRE(abc.length() == 3);
+   REQUIRE(abc[0] == '\0');
+   REQUIRE(abc[1] == '\0');
+   REQUIRE(abc[2] == '\0');
+   //
+   libcrypton::SecureBytes sb2{ std::move(sb) };
+   //
+   REQUIRE(sb.size() == 0);
+   REQUIRE(sb.data() == nullptr);
+   //
+   REQUIRE(sb2.size() == 3);
+   REQUIRE(sb2.at(0) == 'a');
+   REQUIRE(sb2.at(1) == 'b');
+   REQUIRE(sb2.at(2) == 'c');
+   //
+   vbyte xyz = { 0x01, 0x02, 0x03 };
+   libcrypton::SecureBytes sb3{ std::move(xyz) };
+   //
+   REQUIRE(sb3.size() == 3);
+   REQUIRE(sb3.at(0) == 0x01);
+   REQUIRE(sb3.at(1) == 0x02);
+   REQUIRE(sb3.at(2) == 0x03);
+   //
+   REQUIRE(xyz.size() == 3);
+   REQUIRE(xyz[0] == 0x00);
+   REQUIRE(xyz[1] == 0x00);
+   REQUIRE(xyz[2] == 0x00);
+}

@@ -916,7 +916,7 @@ lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32
       if (1 != result)
          handleErrors();
    } else {
-      std::cout << "MODE ECB: " << ecb << std::endl;
+      std::cout << "MODE CBC: " << !ecb << std::endl;
       assert(keylength == 32);
       assert(keylength * 8 == 256);
       assert(AES_BLOCK_SIZE == 16);

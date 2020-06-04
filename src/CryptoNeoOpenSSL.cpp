@@ -409,23 +409,9 @@ Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& p
 
    int rBytes = BN_num_bytes(r);
    int sBytes = BN_num_bytes(s);
-   /*
-   vbyte vsigR(rSize, 0x00);
-   vbyte vsigS(sSize, 0x00);
-   if (rBytes < 32 || sBytes < 32) {
-      std::cout << rBytes << "/" << sBytes << std::endl
-                << std::endl
-                << std::endl;
-   }
-   BN_bn2bin(r, vsigR.data());
-   BN_bn2bin(s, vsigS.data());
-   vbyte vsig = vsigR;
-   vsig.insert( vsig.end(), vsigS.begin(), vsigS.end() );
-
-   unsigned char someBuffer[40] = {0};*/
    vbyte vsig(64, 0x00);
-BN_bn2bin( r, vsig.data() + 32 - rBytes ); // Place R first in the buffer
-BN_bn2bin( s, vsig.data() + 64 - sBytes ); // Place S last in the buffer
+   BN_bn2bin(r, vsig.data() + 32 - rBytes); // Place R first in the buffer
+   BN_bn2bin(s, vsig.data() + 64 - sBytes); // Place S last in the buffer
 
    //BN_bn2bin(*pr, vsig.data()+0);
    //BN_bn2bin(*ps, vsig.data()+32);

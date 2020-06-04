@@ -681,6 +681,8 @@ Crypto::GetPublicKeyFromPrivateKey(const SecureBytes& priv, bool compressed) con
    // 'res' will receive private key value
    BIGNUM* res = BN_new();
    // convert 'priv' to hexstring (uppercase = true)
+   // TODO: avoid 'ToUnsafeBytes' and support a 'ToHexString' directly from SecureBytes
+   // TODO: remember to zero-fill 'spriv' after that.
    std::string spriv = chelper::ToHexString(priv.ToUnsafeBytes(), true);
    // create big integer from hexstring on 'priv'
    int r = BN_hex2bn(&res, spriv.c_str());

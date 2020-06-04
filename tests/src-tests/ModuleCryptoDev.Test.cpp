@@ -106,4 +106,12 @@ TEST_CASE("ModuleCryptoDevTest:  Test_Sign_Verify_Random_32_Message_50_secp256r1
    chelper::trim(out5); // true or false
 
    REQUIRE(out5 == "1");
+
+   // note that this test eventually fails... must check this!
+   /*
+src-tests/ModuleCryptoDev.Test.cpp:108: FAILED:
+  REQUIRE( out5 == "1" )
+with expansion:
+  "0" == "1"
+  */
 }

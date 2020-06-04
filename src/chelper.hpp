@@ -39,6 +39,8 @@ typedef short int16;
 
 typedef int int32;
 
+// SecureBytes is intended to hold bytes that are safely clean after usage (set to '0')
+// It can receive rvalue references && of strings and vbytes, for interoperability (these will be cleanup automatically)
 class SecureBytes final
 {
 private:

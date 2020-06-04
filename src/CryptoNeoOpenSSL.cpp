@@ -380,35 +380,7 @@ Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& p
       return vbyte(0);
    }
 
-   byte* realPubKey = nullptr;
-   int realPublicKeyLength = 65;
-
-   if (pubKeyLength == 33 && (pubKey[0] == 0x02 || pubKey[0] == 0x03)) {
-      // remove const from array: must make sure realPubKey data is never changed
-      realPubKey = const_cast<byte*>(pubKey);
-      realPublicKeyLength = 33;
-   } else if (pubKeyLength == 64) {
-      // 0x04 first
-
-      // TODO: verify if no leak happens in this case
-      realPubKey = new byte[65];
-      realPubKey[0] = 0x04;
-
-      memcpy(&realPubKey[1], pubKey, 64);
-   } else if (pubKeyLength == 65) {
-      if (pubKey[0] != 0x04) {
-         CRYPTON_EXCEPTION("Error on signing");
-         return vbyte(0);
-      }
-
-      // remove const from array: must make sure realPubKey data is never changed
-      realPubKey = const_cast<byte*>(pubKey);
-   } else if (pubKeyLength != 65) {
-      CRYPTON_EXCEPTION("Error on signing 2");
-      return vbyte(0);
-   }
-
-   BIGNUM* bn = BN_bin2bn(realPubKey, realPublicKeyLength, nullptr);
+   BIGNUM* bn = BN_bin2bn(&pubKey[0], pubKeyLength, nullptr);
    EC_POINT* pub = EC_POINT_bn2point(ecgroup, bn, nullptr, nullptr);
    BIGNUM* priv = BN_bin2bn(&mypriv[0], 32, nullptr);
 

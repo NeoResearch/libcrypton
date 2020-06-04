@@ -439,6 +439,8 @@ Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& p
    BN_free(bn);
    EC_GROUP_free(ecgroup);
 
+   // TODO: verify here if signature matches with 'useSha256 = false'
+
    return std::move(vsig);
 }
 

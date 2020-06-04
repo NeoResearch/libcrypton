@@ -55,6 +55,15 @@ public:
    {
    }
 
+   // space initialization
+   SecureBytes(size_t _len, byte default_value = 0x00)
+     : bytes_ptr{ new byte[_len] }
+     , len{ _len }
+   {
+      // set values to default
+      memset(this->bytes_ptr, default_value, _len);
+   }
+
 private:
    byte* just_copy(const byte* ptr, size_t len)
    {
@@ -159,6 +168,18 @@ public:
    bool operator!=(const SecureBytes& sb) const
    {
       return !((*this) == sb);
+   }
+
+   // returns copy of unsafe string (please properly zero-fill this string when used)
+   std::string ToUnsafeString() const
+   {
+      return std::string((char*)this->bytes_ptr, (char*)this->bytes_ptr + this->len);
+   }
+
+   // returns copy of unsafe bytearray (please properly zero-fill this array when used)
+   vbyte ToUnsafeBytes() const
+   {
+      return vbyte(this->bytes_ptr, this->bytes_ptr + this->len);
    }
 
 }; // SecureBytes class

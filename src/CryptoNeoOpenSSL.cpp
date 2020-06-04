@@ -345,7 +345,7 @@ Crypto::AESDecrypt(const SecureBytes& cyphertext, const SecureBytes& key, const 
 // message is already received as a SHA256 digest
 // TODO: better to receive pubkey in general format or specific ECPoint(X,Y) ?
 vbyte
-Crypto::SignData(const vbyte& digest, const vbyte& privkey, const vbyte& pubkey) const
+Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& pubkey) const
 {
    //printf("\n\nSignData\n");
    // TODO: implement low level lSignData? (or keep C++ mixed?)
@@ -563,7 +563,7 @@ lVerifySignature(const byte* data, int32 dataLength, const byte* signature, int3
 }
 
 // generates private key and updates parameter vpubkey (TODO: update function format)
-vbyte
+SecureBytes
 Crypto::GenerateKeyPair(vbyte& vpubkey) const
 {
    //printf("generating priv/pub key\n");
@@ -594,7 +594,7 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
    }
 
    const BIGNUM* priv = EC_KEY_get0_private_key(eckey);
-   vbyte vpriv(32);
+   SecureBytes vpriv(32);
    int conv_error = BN_bn2bin(priv, vpriv.data());
 
    /*
@@ -674,14 +674,14 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
 }
 
 vbyte
-Crypto::GetPublicKeyFromPrivateKey(const vbyte& priv, bool compressed) const
+Crypto::GetPublicKeyFromPrivateKey(const SecureBytes& priv, bool compressed) const
 {
    // ctx is optional buffer
    BN_CTX* ctx = BN_CTX_new();
    // 'res' will receive private key value
    BIGNUM* res = BN_new();
    // convert 'priv' to hexstring (uppercase = true)
-   std::string spriv = chelper::ToHexString(priv, true);
+   std::string spriv = chelper::ToHexString(priv.ToUnsafeBytes(), true);
    // create big integer from hexstring on 'priv'
    int r = BN_hex2bn(&res, spriv.c_str());
    // define working curve (secp256r1)

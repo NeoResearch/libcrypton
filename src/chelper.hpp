@@ -74,6 +74,7 @@ public:
       return ToHexString(vbyte(1, b), cs);
    }
 
+
    static std::string
    ASCIIToHexString(const std::string& chars)
    {

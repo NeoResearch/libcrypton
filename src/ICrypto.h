@@ -42,7 +42,7 @@ public:
    // not available on Neo ICrypto, but important for usage
    // -----------------------------------------------------
 
-   virtual vbyte Sign(const vbyte& message, const vbyte& prikey, const vbyte& pubkey) const = 0;
+   virtual vbyte Sign(const vbyte& message, const SecureBytes& prikey, const vbyte& pubkey) const = 0;
    //{
    //   // TODO: implement
    //   return vbyte(0);
@@ -58,18 +58,18 @@ public:
    // proposed methods
    // -----------------
 
-   virtual vbyte GeneratePrivateKey()
+   virtual SecureBytes GeneratePrivateKey()
    {
       return RandBytes(32);
    }
 
    // returns private and updates public (TODO: rethink method)
-   virtual vbyte GenerateKeyPair(vbyte& vpubkey) const
+   virtual SecureBytes GenerateKeyPair(vbyte& vpubkey) const
    {
       return vbyte(0);
    }
 
-   virtual vbyte GetPublicKeyFromPrivateKey(const vbyte& priv, bool compressed) const
+   virtual vbyte GetPublicKeyFromPrivateKey(const SecureBytes& priv, bool compressed) const
    {
       // TODO: if (!EC_POINT_mul(ecdsa->group, pub_key, priv_key, NULL, NULL, ctx))
       return vbyte(0);
@@ -82,7 +82,7 @@ public:
    }
 
    // generate random bytes, used for private applications
-   virtual vbyte RandBytes(int count)
+   virtual SecureBytes RandBytes(int count)
    {
       int MAX = 1024 * 10; // 10KiB MAX
       if ((count < 0) || (count > MAX))
@@ -103,6 +103,7 @@ public:
       return vbytes;
    }
 };
-}
+//
+} // namespace libcrypton
 
 #endif

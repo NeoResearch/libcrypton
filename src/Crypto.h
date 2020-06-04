@@ -91,12 +91,12 @@ public:
       return vout;
    }
 
-   vbyte Sign(const vbyte& message, const vbyte& privkey, const vbyte& pubkey) const
+   vbyte Sign(const vbyte& message, const SecureBytes& privkey, const vbyte& pubkey) const
    {
       return SignData(Sha256(message), privkey, pubkey);
    }
 
-   vbyte GetPublicKeyFromPrivateKey(const vbyte& priv, bool compressed) const;
+   vbyte GetPublicKeyFromPrivateKey(const SecureBytes& priv, bool compressed) const;
    /*
    public byte[] Sign(byte[] message, byte[] prikey, byte[] pubkey)
 {
@@ -117,9 +117,9 @@ public:
 */
 
    // TODO: receive pubkey or already ECPoint(X,Y) ?
-   vbyte SignData(const vbyte& digest, const vbyte& prikey, const vbyte& pubkey) const;
+   vbyte SignData(const vbyte& digest, const SecureBytes& prikey, const vbyte& pubkey) const;
 
-   virtual vbyte GenerateKeyPair(vbyte& vpubkey) const;
+   virtual SecureBytes GenerateKeyPair(vbyte& vpubkey) const;
 
    // manually added
    static vbyte FromHexString(std::string hex)

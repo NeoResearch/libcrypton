@@ -42,7 +42,7 @@ public:
    // not available on Neo ICrypto, but important for usage
    // -----------------------------------------------------
 
-   virtual vbyte Sign(const vbyte& message, const SecureBytes& prikey, const vbyte& pubkey) const = 0;
+   virtual vbyte Sign(const vbyte& message, const SecureBytes& prikey, const vbyte& pubkey, bool verify = true) const = 0;
    //{
    //   // TODO: implement
    //   return vbyte(0);

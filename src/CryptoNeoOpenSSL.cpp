@@ -686,6 +686,9 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
 
    else {
       std::cout << "WARNING: verify when getpubkey is eventually not same as gen keypair on openssl" << std::endl;
+      std::cout << "vsig = " << vsig << std::endl;
+      std::cout << "newPub = " << chelper::ToHexString(newPub) << std::endl;
+      std::cout << "vpubkey = " << chelper::ToHexString(vpubkey) << std::endl;
       return GenerateKeyPair(vpubkey); // try again!
    }
 }

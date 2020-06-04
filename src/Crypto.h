@@ -84,16 +84,22 @@ public:
    vbyte XOR(const vbyte& v1, const vbyte& v2) const
    {
       vbyte vout(v1.size(), 0x00);
-      if(v1.size() != v2.size())
+      if (v1.size() != v2.size())
          return vbyte{}; // empty
-      for(unsigned i=0; i<v1.size(); i++)
+      for (unsigned i = 0; i < v1.size(); i++)
          vout[i] = v1[i] ^ v2[i];
       return vout;
    }
 
-   vbyte Sign(const vbyte& message, const SecureBytes& privkey, const vbyte& pubkey) const
+   vbyte Sign(const vbyte& message, const SecureBytes& privkey, const vbyte& pubkey, bool verify = true) const
    {
-      return SignData(Sha256(message), privkey, pubkey);
+      vbyte hashedMsg = Sha256(message);
+      vbyte signedMsg = SignData(hashedMsg, privkey, pubkey);
+      if(verify)
+      // try many times to sign... why do we need this?
+      while (!VerifySignature(message, signedMsg, pubkey))
+         signedMsg = SignData(hashedMsg, privkey, pubkey);
+      return signedMsg;
    }
 
    vbyte GetPublicKeyFromPrivateKey(const SecureBytes& priv, bool compressed) const;

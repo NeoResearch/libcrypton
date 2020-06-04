@@ -8,6 +8,7 @@
 // system includes
 #include <assert.h>
 #include <cstring>
+#include <iostream>
 #include <string>
 
 /*
@@ -95,10 +96,12 @@ public:
    {
       vbyte hashedMsg = Sha256(message);
       vbyte signedMsg = SignData(hashedMsg, privkey, pubkey);
-      if(verify)
-      // try many times to sign... why do we need this?
-      while (!VerifySignature(message, signedMsg, pubkey))
-         signedMsg = SignData(hashedMsg, privkey, pubkey);
+      if (verify)
+         // try many times to sign... why do we need this?
+         while (!VerifySignature(message, signedMsg, pubkey)) {
+            std::cout << "WARNING: libcrypton 'verify' on Sign had to sign again..." << std::endl;
+            signedMsg = SignData(hashedMsg, privkey, pubkey);
+         }
       return signedMsg;
    }
 

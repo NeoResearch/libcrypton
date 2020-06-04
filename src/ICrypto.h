@@ -82,7 +82,8 @@ public:
    }
 
    // generate random bytes, used for private applications
-   virtual SecureBytes RandBytes(int count)
+   // Note: this is 'const', but it's non-deterministic (takes entropy from system)
+   virtual SecureBytes RandBytes(int count) const
    {
       int MAX = 1024 * 10; // 10KiB MAX
       if ((count < 0) || (count > MAX))

@@ -594,8 +594,13 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
    }
 
    const BIGNUM* priv = EC_KEY_get0_private_key(eckey);
-   SecureBytes vpriv(32);
-   int conv_error = BN_bn2bin(priv, vpriv.data());
+   // Big-Endian private key from 'BN_bn2bin()'
+   // beware that 'priv' may be smaller than 32... example: 0x00010203...
+   int usedSize = BN_num_bytes(priv);
+   SecureBytes vpriv(32, 0x00);
+   int realSize = BN_bn2bin(priv, vpriv.data() + (32 - usedSize));
+   //std::copy(vpriv1.data(), vpriv1.data()+realSize, vpriv.data()+(32-realSize));
+   //std:: cout << "size bn priv: " << realSize << std::endl;
 
    /*
 	char * number_str = BN_bn2hex(priv);
@@ -657,16 +662,28 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
    //EC_POINT_free(pub_key);
    EC_GROUP_free(ecgroup);
 
-   // ========================================================
-   // ================= CHECK GET PUBLIC KEY =================
+   // =================================================================
+   // ================= CHECK PRIVATE AND PUBLIC KEYS =================
    //
-   // IS THIS REALLY NECESSARY?
-   // WHY IS THIS POSSIBLE TO HAPPEN?
+   // test simple signature
+   //vbyte testMsg = this->RandBytes(10).ToUnsafeBytes();
+   vbyte testMsg = {0x01, 0x02, 0x03};
+   vbyte sign1 = Sign(testMsg, vpriv, vpubkey);
+   bool vsig = VerifySignature(testMsg, sign1, vpubkey);
+   // clean 'testMsg' and 'sign1' (get rid of everything...)
+   memset(testMsg.data(), 0, testMsg.size());
+   SecureBytes::escape(testMsg.data());
+   // TODO: may also use cleaning from OpenSSL here...
+   memset(sign1.data(), 0, sign1.size());
+   SecureBytes::escape(sign1.data());
+   // TODO: may also use cleaning from OpenSSL here...
    //
    // get compressed pubkey from this private key (just generated...)
    vbyte newPub = GetPublicKeyFromPrivateKey(vpriv, true);
-   if (newPub == vpubkey)
+   if (vsig && (newPub == vpubkey)) {
       return vpriv; // all is fine!
+   }
+
    else {
       std::cout << "WARNING: verify when getpubkey is eventually not same as gen keypair on openssl" << std::endl;
       return GenerateKeyPair(vpubkey); // try again!

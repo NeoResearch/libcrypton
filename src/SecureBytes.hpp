@@ -112,7 +112,7 @@ public:
       return len;
    }
 
-private:
+public:
    // using "trick" from google-benchmark talk
    // CppCon 2015: Chandler Carruth "Tuning C++: Benchmarks, and CPUs, and Compilers! Oh My!"
    // this is used in different "flavors"

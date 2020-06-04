@@ -36,7 +36,7 @@ public:
    }
 
    // Verify signature against public key on elliptic curve NIST P-256 (secp256r1)
-   virtual bool VerifySignature(const vbyte& message, const vbyte& signature, const vbyte& pubkey) const = 0;
+   virtual bool VerifySignature(const vbyte& message, const vbyte& signature, const vbyte& pubkey, bool useSha256 = true) const = 0;
 
    // -----------------------------------------------------
    // not available on Neo ICrypto, but important for usage

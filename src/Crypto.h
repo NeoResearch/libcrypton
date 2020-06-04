@@ -53,7 +53,7 @@ public:
 
    vbyte Hash256(const vbyte& message) const;
 
-   bool VerifySignature(const vbyte& message, const vbyte& signature, const vbyte& pubkey) const;
+   bool VerifySignature(const vbyte& message, const vbyte& signature, const vbyte& pubkey, bool useSha256 = true) const;
 
    // SHA256
    vbyte Sha256(const vbyte& message) const;

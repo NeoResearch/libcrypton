@@ -70,7 +70,7 @@ lComputeKeccak(const unsigned char* message, size_t message_len, vbyte& digest);
 
 // -1=ERROR , 0= False , 1=True
 static int16
-lVerifySignature(const byte* data, int32 dataLength, const byte* signature, int32 signatureLength, const byte* pubKey, int32 pubKeyLength);
+lVerifySignature(const byte* data, int32 dataLength, const byte* signature, int32 signatureLength, const byte* pubKey, int32 pubKeyLength, bool useSha256);
 
 //private:
 static const int32 _curve = NID_X9_62_prime256v1; // secp256r1
@@ -246,9 +246,9 @@ Crypto::Hash256(const vbyte& message) const
 }
 
 bool
-Crypto::VerifySignature(const vbyte& message, const vbyte& signature, const vbyte& pubkey) const
+Crypto::VerifySignature(const vbyte& message, const vbyte& signature, const vbyte& pubkey, bool useSha256) const
 {
-   int16 ret = lVerifySignature(message.data(), message.size(), signature.data(), signature.size(), pubkey.data(), pubkey.size());
+   int16 ret = lVerifySignature(message.data(), message.size(), signature.data(), signature.size(), pubkey.data(), pubkey.size(), useSha256);
    if (ret == -1)
       CRYPTON_EXCEPTION("ERROR ON VerifySignature");
    return ret == 1;
@@ -475,8 +475,12 @@ Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& p
 // =========================
 
 int16
-lVerifySignature(const byte* data, int32 dataLength, const byte* signature, int32 signatureLength, const byte* pubKey, int32 pubKeyLength)
+lVerifySignature(const byte* data, int32 dataLength, const byte* signature, int32 signatureLength, const byte* pubKey, int32 pubKeyLength, bool useSha256)
 {
+   if ((!useSha256) && (dataLength != 32)) {
+      std::cout << "WARNING: libcrypton not using SHA256 on verify with size not 32..." << std::endl;
+   }
+
    if (signatureLength != 64)
       return -1;
 
@@ -529,9 +533,12 @@ lVerifySignature(const byte* data, int32 dataLength, const byte* signature, int3
 
                if (sig != nullptr) {
                   if (gen_status == 0x01) {
-                     byte hash[::SHA256_LENGTH];
-                     lComputeSHA256(data, dataLength, hash);
-                     ret = ECDSA_do_verify(hash, ::SHA256_LENGTH, sig, eckey);
+                     if (useSha256) {
+                        byte hash[::SHA256_LENGTH];
+                        lComputeSHA256(data, dataLength, hash);
+                        ret = ECDSA_do_verify(hash, ::SHA256_LENGTH, sig, eckey);
+                     } else
+                        ret = ECDSA_do_verify(data, ::SHA256_LENGTH, sig, eckey);
                   }
 
                   // Free r,s and sig
@@ -666,10 +673,10 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
    // ================= CHECK PRIVATE AND PUBLIC KEYS =================
    //
    // test simple signature
-   //vbyte testMsg = this->RandBytes(10).ToUnsafeBytes();
-   vbyte testMsg = {0x01, 0x02, 0x03};
-   vbyte sign1 = Sign(testMsg, vpriv, vpubkey);
-   bool vsig = VerifySignature(testMsg, sign1, vpubkey);
+   vbyte testMsg = this->RandBytes(32).ToUnsafeBytes();
+   //vbyte testMsg = {0x01, 0x02, 0x03};
+   vbyte sign1 = SignData(testMsg, vpriv, vpubkey);
+   bool vsig = VerifySignature(testMsg, sign1, vpubkey, false); // do NOT use sha256
    // clean 'testMsg' and 'sign1' (get rid of everything...)
    memset(testMsg.data(), 0, testMsg.size());
    SecureBytes::escape(testMsg.data());

@@ -407,9 +407,26 @@ Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& p
    ECDSA_SIG_get0(signature, &r, &s);
    //signature->r  gives forward declaration issue
 
-   vbyte vsig(64, 0);
-   BN_bn2bin(r, vsig.data() + 0);
-   BN_bn2bin(s, vsig.data() + 32);
+   int rBytes = BN_num_bytes(r);
+   int sBytes = BN_num_bytes(s);
+   /*
+   vbyte vsigR(rSize, 0x00);
+   vbyte vsigS(sSize, 0x00);
+   if (rBytes < 32 || sBytes < 32) {
+      std::cout << rBytes << "/" << sBytes << std::endl
+                << std::endl
+                << std::endl;
+   }
+   BN_bn2bin(r, vsigR.data());
+   BN_bn2bin(s, vsigS.data());
+   vbyte vsig = vsigR;
+   vsig.insert( vsig.end(), vsigS.begin(), vsigS.end() );
+
+   unsigned char someBuffer[40] = {0};*/
+   vbyte vsig(64, 0x00);
+BN_bn2bin( r, vsig.data() + 32 - rBytes ); // Place R first in the buffer
+BN_bn2bin( s, vsig.data() + 64 - sBytes ); // Place S last in the buffer
+
    //BN_bn2bin(*pr, vsig.data()+0);
    //BN_bn2bin(*ps, vsig.data()+32);
    //BN_free(r);
@@ -456,31 +473,6 @@ lVerifySignature(const byte* data, int32 dataLength, const byte* signature, int3
    if (signatureLength != 64)
       return -1;
 
-   byte* realPubKey = nullptr;
-   int32 realPublicKeyLength = 65;
-
-   if (pubKeyLength == 33 && (pubKey[0] == 0x02 || pubKey[0] == 0x03)) {
-      // remove const from array: must make sure realPubKey data is never changed
-      realPubKey = const_cast<byte*>(pubKey);
-      realPublicKeyLength = 33;
-   } else if (pubKeyLength == 64) {
-      // 0x04 first
-
-      // TODO: verify if no leak happens in this case
-      realPubKey = new byte[65];
-      realPubKey[0] = 0x04;
-
-      memcpy(&realPubKey[1], pubKey, 64);
-   } else if (pubKeyLength == 65) {
-      if (pubKey[0] != 0x04)
-         return -1;
-
-      // remove const from array: must make sure realPubKey data is never changed
-      realPubKey = const_cast<byte*>(data);
-   } else if (pubKeyLength != 65) {
-      return -1;
-   }
-
    int32 ret = -1;
    EC_GROUP* ecgroup = EC_GROUP_new_by_curve_name(_curve);
 
@@ -488,7 +480,7 @@ lVerifySignature(const byte* data, int32 dataLength, const byte* signature, int3
       EC_KEY* eckey = EC_KEY_new_by_curve_name(_curve);
 
       if (eckey != nullptr) {
-         BIGNUM* bn = BN_bin2bn(realPubKey, realPublicKeyLength, nullptr);
+         BIGNUM* bn = BN_bin2bn(&pubKey[0], pubKeyLength, nullptr);
          EC_POINT* pub = EC_POINT_bn2point(ecgroup, bn, nullptr, nullptr);
 
          if (pub != nullptr) {
@@ -533,10 +525,6 @@ lVerifySignature(const byte* data, int32 dataLength, const byte* signature, int3
    }
 
    // free
-
-   if (realPubKey != pubKey) {
-      delete[](realPubKey);
-   }
 
    return ret == 0x01 ? 0x01 : 0x00;
 }

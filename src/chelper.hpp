@@ -1,5 +1,5 @@
-#ifndef CHELPER_H
-#define CHELPER_H
+#ifndef LIBCRYPTON_CHELPER_H
+#define LIBCRYPTON_CHELPER_H
 
 // Crypto Helper: chelper
 
@@ -12,6 +12,11 @@
 #include <sstream>
 #include <vector>
 
+#if defined(_MSC_VER)
+// supporting windows native secure memory
+#include <Windows.h>
+#endif
+
 // neo core
 //#include <numbers/UInt160.hpp>
 //#include <system/types.h>
@@ -20,7 +25,7 @@
 
 namespace libcrypton {
 
-#define CRYPTON_EXCEPTION(str)                               \
+#define CRYPTON_EXCEPTION(str)                             \
    {                                                       \
       printf("libcrypton error(%s): %s\n", __func__, str); \
       exit(1);                                             \
@@ -33,6 +38,135 @@ typedef std::vector<byte> vbyte;
 typedef short int16;
 
 typedef int int32;
+
+class SecureBytes final
+{
+private:
+   libcrypton::byte* bytes_ptr;
+   size_t len;
+
+public:
+   // take dead vector of pointer
+   SecureBytes(vbyte&& corpse)
+     : bytes_ptr{ copy_and_zero(corpse.data(), corpse.size()) }
+     , len{ corpse.size() }
+   {
+   }
+
+   // take dead string
+   SecureBytes(std::string&& corpse)
+     : bytes_ptr{ copy_and_zero((unsigned char*)corpse.c_str(), corpse.length()) }
+     , len{ corpse.length() }
+   {
+   }
+
+   // take dead SecureBytes
+   SecureBytes(SecureBytes&& corpse)
+     : bytes_ptr{ corpse.bytes_ptr }
+     , len{ corpse.len }
+   {
+      corpse.bytes_ptr = nullptr;
+      corpse.len = 0;
+   }
+
+   // just copy: do not care about other! make sure '_other' is safely set to zero!
+   SecureBytes(unsigned char* _other, size_t _len)
+     : bytes_ptr{ just_copy(_other, _len) }
+     , len{ _len }
+   {
+   }
+
+private:
+   byte* just_copy(byte* ptr, size_t len)
+   {
+      byte* _bytes_ptr = new byte[len];
+      std::copy(ptr, ptr + len, _bytes_ptr);
+      return _bytes_ptr;
+   }
+
+   byte* copy_and_zero(byte* ptr, size_t len)
+   {
+      byte* _bytes_ptr = new byte[len];
+      std::copy(ptr, ptr + len, _bytes_ptr);
+// using native windows support, if on visual studio compiler
+#if defined(_MSC_VER)
+      SecureZeroMemory(ptr, len); // requires "Windows.h"
+#else
+      std::memset(ptr, 0, len);
+      // by declaring a volatile asm, compiler is likely to not optimize it out.. and this is IMPORTANT!
+      escape(ptr);
+#endif
+      return _bytes_ptr;
+   }
+
+public:
+   // get 'byte' at position 'index'
+   byte at(unsigned index) const
+   {
+      return bytes_ptr[index];
+   }
+
+   // get internal pointer
+   byte* data()
+   {
+      return bytes_ptr;
+   }
+
+   // get internal pointer (const)
+   const byte* data() const
+   {
+      return bytes_ptr;
+   }
+
+   // get number of bytes in SecureBytes
+   size_t size() const
+   {
+      return len;
+   }
+
+private:
+   // using "trick" from google-benchmark talk
+   // CppCon 2015: Chandler Carruth "Tuning C++: Benchmarks, and CPUs, and Compilers! Oh My!"
+   // this is used in different "flavors"
+   static void escape(void* p)
+   {
+      // TODO: verify option 'g' here... on some places it's a 'r'
+      // Best to check this on profiler, as an individual project 'SecureBytes'
+      asm volatile(""
+                   :
+                   : "g"(p)
+                   : "memory");
+   }
+   // also useful to prevent optimizations
+   static void clobber()
+   {
+      asm volatile(""
+                   :
+                   :
+                   : "memory");
+   }
+
+public:
+   ~SecureBytes()
+   {
+      if (len > 0) {
+// using native windows support, if on visual studio compiler
+#if defined(_MSC_VER)
+         SecureZeroMemory(bytes_ptr, len); // requires "Windows.h"
+#else
+         std::memset(bytes_ptr, 0, len);
+         // by declaring a volatile asm, compiler is likely to not optimize it out.. and this is IMPORTANT!
+         escape(bytes_ptr);
+#endif
+         // free bytes pointer
+         delete[] bytes_ptr;
+         // finish with pointer reference
+         bytes_ptr = nullptr;
+         // is it ok to clobber after disposal?
+         clobber();
+      }
+   }
+}; // SecureBytes class
 
 // crypto helper class
 class chelper
@@ -49,8 +183,7 @@ public:
    {
       s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
                  return !std::isspace(ch);
-              })
-                .base(),
+              }).base(),
               s.end());
    }
 
@@ -131,4 +264,4 @@ public:
 // TODO: define all operators here that are necessary
 }
 
-#endif
+#endif // LIBCRYPTON_CHELPER_H

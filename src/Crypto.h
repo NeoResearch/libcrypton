@@ -77,9 +77,9 @@ public:
    // ECB does not require an Initialization Vector (thus pass an empty 'vbyte')
    // =================================================
 
-   vbyte AESEncrypt(const vbyte& message, const vbyte& key, const vbyte& iv, bool padding, bool ecb) const;
+   SecureBytes AESEncrypt(const SecureBytes& message, const SecureBytes& key, const SecureBytes& iv, bool padding, bool ecb) const;
 
-   vbyte AESDecrypt(const vbyte& message, const vbyte& key, const vbyte& iv, bool padding, bool ecb) const;
+   SecureBytes AESDecrypt(const SecureBytes& message, const SecureBytes& key, const SecureBytes& iv, bool padding, bool ecb) const;
 
    vbyte XOR(const vbyte& v1, const vbyte& v2) const
    {
@@ -138,7 +138,7 @@ public:
 
    ///vbyte RandBytes(int count); // generate random bytes, used for private applications
 
-   static vbyte NO_IV;
+   static SecureBytes NO_IV;
 }; // class Crypto
 //
 } // namespace libcrypton

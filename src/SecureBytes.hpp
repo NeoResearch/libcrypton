@@ -145,6 +145,22 @@ public:
          clobber();
       }
    }
+
+   bool operator==(const SecureBytes& sb) const
+   {
+      if (this->len != sb.len)
+         return false;
+      for (unsigned i = 0; i < this->len; i++)
+         if (this->bytes_ptr[i] != sb.bytes_ptr[i])
+            return false;
+      return true;
+   }
+
+   bool operator!=(const SecureBytes& sb) const
+   {
+      return !((*this) == sb);
+   }
+
 }; // SecureBytes class
 //
 } // namespace libcrypton

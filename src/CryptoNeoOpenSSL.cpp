@@ -20,7 +20,7 @@
 using namespace libcrypton;
 //using namespace std; // do not use
 
-vbyte Crypto::NO_IV = vbyte{}; // empty array representing NO_IV
+SecureBytes Crypto::NO_IV = std::move(vbyte{}); // empty array representing NO_IV
 
 // first thing, declare private static variable _crypto
 ICrypto* Crypto::_crypto = nullptr;
@@ -298,8 +298,8 @@ Crypto::RIPEMD160(const vbyte& message) const
 // ECB does not require an Initialization Vector (thus pass an empty 'vbyte')
 // =================================================
 
-vbyte
-Crypto::AESEncrypt(const vbyte& message, const vbyte& key, const vbyte& iv, bool padding, bool ecb) const
+SecureBytes
+Crypto::AESEncrypt(const SecureBytes& message, const SecureBytes& key, const SecureBytes& iv, bool padding, bool ecb) const
 {
    // must guarantee there's enough room for: 'message.size()' + cipher_block_size
    //
@@ -322,8 +322,8 @@ Crypto::AESEncrypt(const vbyte& message, const vbyte& key, const vbyte& iv, bool
    //return voutput;
 }
 
-vbyte
-Crypto::AESDecrypt(const vbyte& cyphertext, const vbyte& key, const vbyte& iv, bool padding, bool ecb) const
+SecureBytes
+Crypto::AESDecrypt(const SecureBytes& cyphertext, const SecureBytes& key, const SecureBytes& iv, bool padding, bool ecb) const
 {
    // must guarantee there's enough room for: 'cyphertext.size()' + cipher_block_size
    // https://www.openssl.org/docs/man1.1.1/man3/EVP_DecryptUpdate.html

@@ -250,4 +250,17 @@ TEST_CASE("CryptoTest:  Test_SecureBytes")
    REQUIRE(xyz[0] == 0x00);
    REQUIRE(xyz[1] == 0x00);
    REQUIRE(xyz[2] == 0x00);
+   //
+   // regular copy (the two will have same data protected with same rules)
+   libcrypton::SecureBytes sb4{ sb3 };
+   //
+   REQUIRE(sb3.size() == 3);
+   REQUIRE(sb3.at(0) == 0x01);
+   REQUIRE(sb3.at(1) == 0x02);
+   REQUIRE(sb3.at(2) == 0x03);
+   //
+   REQUIRE(sb4.size() == 3);
+   REQUIRE(sb4.at(0) == 0x01);
+   REQUIRE(sb4.at(1) == 0x02);
+   REQUIRE(sb4.at(2) == 0x03);
 }

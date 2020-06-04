@@ -71,15 +71,21 @@ public:
       corpse.len = 0;
    }
 
+   // copy SecureBytes
+   SecureBytes(const SecureBytes& other)
+     : SecureBytes(other.data(), other.size())
+   {
+   }
+
    // just copy: do not care about other! make sure '_other' is safely set to zero!
-   SecureBytes(unsigned char* _other, size_t _len)
+   SecureBytes(const unsigned char* _other, size_t _len)
      : bytes_ptr{ just_copy(_other, _len) }
      , len{ _len }
    {
    }
 
 private:
-   byte* just_copy(byte* ptr, size_t len)
+   byte* just_copy(const byte* ptr, size_t len)
    {
       byte* _bytes_ptr = new byte[len];
       std::copy(ptr, ptr + len, _bytes_ptr);

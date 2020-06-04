@@ -456,6 +456,8 @@ BN_bn2bin( s, vsig.data() + 64 - sBytes ); // Place S last in the buffer
    BN_free(bn);
    EC_GROUP_free(ecgroup);
 
+   // TODO: verify here if signature matches with 'useSha256 = false'
+
    return std::move(vsig);
 }
 

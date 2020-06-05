@@ -123,7 +123,7 @@ TEST_CASE("CryptoTest:  Test_AES_Encrypt_Decrypt_Example_OpenSSL_Padding_CBC")
    REQUIRE(data == resultDecrypt);
 }
 
-TEST_CASE("CryptoTest:  Test_Scrypt64")
+TEST_CASE("CryptoTest:  Test_Scrypt64_OpenSSL")
 {
    Crypto crypto;
 
@@ -136,6 +136,20 @@ TEST_CASE("CryptoTest:  Test_Scrypt64")
    SecureBytes derive = crypto.Scrypt64(pass, salt, 1024, 8, 16);
 
    SecureBytes result = libcrypton::chelper::HexToBytes("fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640");
+
+   REQUIRE(derive == result);
+}
+
+TEST_CASE("CryptoTest:  Test_Scrypt64_NEO_Example")
+{
+   Crypto crypto;
+
+   SecureBytes pass = libcrypton::chelper::HexToBytes("010203");
+   SecureBytes salt = libcrypton::chelper::HexToBytes("040506");
+
+   SecureBytes derive = crypto.Scrypt64(pass, salt, 32, 2, 2);
+
+   SecureBytes result = libcrypton::chelper::HexToBytes("b6274d3a81892c24335ab46a08ec16d040ac00c5943b212099a44b76a9b8102631ab988fa07fb35357cee7b0e3910098c0774c0e97399997676d890b2bf2bb25");
 
    REQUIRE(derive == result);
 }

@@ -17,7 +17,6 @@ get_submodules:
 	git submodule update --init --recursive
 	git submodule update --recursive
 
-
 openssl:
 ifeq (,$(wildcard ./build/openssl/liblinux-openssl-crypto-x86_64.a))
 	@echo "OpenSSL needs to be built"
@@ -30,6 +29,15 @@ else
 endif
 	@echo "=========== Finished OpenSSL ==========="
 
+cryptopp:
+	cd thirdparty/cryptopp/ && make
+	@echo "=========== Finished Crypto++ ==========="
+
+test:
+	cd tests && make test
+
+clean:
+	rm -f bin/crypdev
 
 old_openssl:
 	#cd src/core && chmod +x linux_get_build_openssl.sh
@@ -40,14 +48,3 @@ old_openssl:
 	cp build/openssl/libcrypto.a build/openssl/liblinux-openssl-crypto-x86_64.a
 	#cp -r build/openssl/include/openssl/* build/openssl/include/openssl/
 	#mv tmp_build/libcrypto.a crypto/openssl/liblinux-openssl-crypto-x86_64.a
-
-
-cryptopp:
-	cd thirdparty/cryptopp/ && make
-	@echo "=========== Finished Crypto++ ==========="
-
-test:
-	cd tests && make test
-
-clean:
-	rm -f bin/crypdev

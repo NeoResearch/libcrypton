@@ -20,6 +20,7 @@ get_submodules:
 openssl:
 ifeq (,$(wildcard ./build/openssl/liblinux-openssl-crypto-x86_64.a))
 	@echo "OpenSSL needs to be built"
+	rm -rf build/openssl/
 	mkdir -p build/openssl
 	(cd build/openssl && ../../libopenssl/config && make && make test)
 	cp -r libopenssl/include build/openssl/   # include files

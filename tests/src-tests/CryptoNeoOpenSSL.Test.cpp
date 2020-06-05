@@ -123,6 +123,23 @@ TEST_CASE("CryptoTest:  Test_AES_Encrypt_Decrypt_Example_OpenSSL_Padding_CBC")
    REQUIRE(data == resultDecrypt);
 }
 
+TEST_CASE("CryptoTest:  Test_Scrypt64")
+{
+   Crypto crypto;
+
+   std::string str_pass = "password";
+   std::string str_salt = "NaCl";
+
+   SecureBytes pass = chelper::HexToBytes(chelper::ASCIIToHexString(str_pass));
+   SecureBytes salt = chelper::HexToBytes(chelper::ASCIIToHexString(str_salt));
+
+   SecureBytes derive = crypto.Scrypt64(pass, salt, 1024, 8, 16);
+
+   SecureBytes result = libcrypton::chelper::HexToBytes("fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640");
+
+   REQUIRE(derive == result);
+}
+
 TEST_CASE("CryptoTest:  Test_Hash256_Zero")
 {
    Crypto crypto;
@@ -256,12 +273,12 @@ TEST_CASE("CryptoTest:  Test_SecureBytes")
 TEST_CASE("CryptoTest:  Test_GetPubkey_from_Zero_Private")
 {
    Crypto crypto;
-   vbyte msg(0); // '': empty message
+   vbyte msg(0);                    // '': empty message
    SecureBytes myprivkey(32, 0x00); // zero big int (Big-Endian)
    //
    vbyte mypubkey = crypto.GetPublicKeyFromPrivateKey(myprivkey, true); // compressed
    //
    // BAD PRIVATE KEY CANNOT GENERATE PUBKEY!
    //
-   REQUIRE(mypubkey.size() == 0); 
+   REQUIRE(mypubkey.size() == 0);
 }

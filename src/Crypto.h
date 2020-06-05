@@ -82,6 +82,8 @@ public:
 
    SecureBytes AESDecrypt(const SecureBytes& message, const SecureBytes& key, const SecureBytes& iv, bool padding, bool ecb) const;
 
+   SecureBytes Scrypt64(const SecureBytes& pass, const SecureBytes& salt, const int n, const int r, const int p) const;
+
    vbyte XOR(const vbyte& v1, const vbyte& v2) const
    {
       vbyte vout(v1.size(), 0x00);

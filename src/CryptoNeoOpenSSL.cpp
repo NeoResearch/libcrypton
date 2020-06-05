@@ -10,6 +10,8 @@
 #include <openssl/sha.h>
 
 #include <openssl/evp.h> // sha-3 (unknown if keccak or post-keccak / NIST SHA-3)
+#include <openssl/kdf.h>
+#include <openssl/params.h>
 
 #include <iostream>
 
@@ -57,10 +59,13 @@ void
 lComputeHash256(const byte* data, int32 length, byte* output);
 void
 lComputeRIPEMD160(const byte* data, int32 length, byte* output);
+
 int
 lAESEncrypt(const byte* plaintext, int32 plaintext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* ciphertext, int32 outlength, bool padding, bool ecb);
 int
 lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32 keylength, byte* iv, int32 ivlength, byte* plaintext, int32 plaintext_len, bool padding, bool ecb);
+int
+lScrypt64(const byte* pass, const int32 pass_len, const byte* salt, const int32 salt_len, const uint64_t n, const uint32_t r, const uint32_t p, byte* derive, int32 derive_len);
 
 void
 lComputeSHA3OpenSSL(const unsigned char* message, size_t message_len, unsigned char** digest, unsigned int* digest_len);
@@ -336,6 +341,17 @@ Crypto::AESDecrypt(const SecureBytes& cyphertext, const SecureBytes& key, const 
       return vbyte{}; // do not pass 'IV' to 'ECB' Mode.
 
    int real_size = lAESDecrypt(cyphertext.data(), cyphertext.size(), key.data(), key.size(), (unsigned char*)iv.data(), iv.size(), voutput.data(), voutput.size(), padding, ecb);
+   std::cout << "given size: " << voutput.size() << " out_size=" << real_size << std::endl;
+   vbyte realout(voutput.begin(), voutput.begin() + real_size);
+   //assert(voutput.size() == real_size);
+   return realout;
+}
+
+SecureBytes
+Crypto::Scrypt64(const SecureBytes& pass, const SecureBytes& salt, const int n, const int r, const int p) const
+{
+   vbyte voutput(64, 0x00);
+   int real_size = lScrypt64(pass.data(), pass.size(), salt.data(), salt.size(), n, r, p, voutput.data(), voutput.size());
    std::cout << "given size: " << voutput.size() << " out_size=" << real_size << std::endl;
    vbyte realout(voutput.begin(), voutput.begin() + real_size);
    //assert(voutput.size() == real_size);
@@ -958,6 +974,36 @@ lAESDecrypt(const byte* ciphertext, int32 ciphertext_len, const byte* key, int32
    EVP_CIPHER_CTX_free(ctx);
 
    return plaintext_len;
+}
+
+int
+lScrypt64(const byte* pass, const int32 pass_len, const byte* salt, const int32 salt_len, const uint64_t n, const uint32_t r, const uint32_t p, byte* derive, int32 derive_len)
+{
+   EVP_KDF* kdf;
+   EVP_KDF_CTX* kctx;
+   OSSL_PARAM params[6], *p = params;
+   kdf = EVP_KDF_fetch(NULL, "SCRYPT", NULL);
+   kctx = EVP_KDF_CTX_new(kdf);
+   EVP_KDF_free(kdf);
+   *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD,
+                                            pass,
+                                            pass_len);
+   *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT,
+                                            salt,
+                                            salt_len);
+   *p++ = OSSL_PARAM_construct_uint64(OSSL_KDF_PARAM_SCRYPT_N, n);
+   *p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_SCRYPT_R, r);
+   *p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_SCRYPT_P, p);
+   *p = OSSL_PARAM_construct_end();
+
+   if (EVP_KDF_CTX_set_params(kctx, params) <= 0) {
+      CRYPTON_EXCEPTION("EVP_KDF_CTX_set_params");
+   }
+   if (EVP_KDF_derive(kctx, derive, derive_len) <= 0) {
+      CRYPTON_EXCEPTION("EVP_KDF_derive");
+   }
+   EVP_KDF_CTX_free(kctx);
+   return derive_len;
 }
 
 void

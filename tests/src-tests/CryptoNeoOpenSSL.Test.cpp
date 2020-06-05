@@ -137,8 +137,6 @@ TEST_CASE("CryptoTest:  Test_SignData_EmptyMessage")
    Crypto crypto;
    vbyte msg(0); // '': empty message
 
-   int countFail = 0;
-
    constexpr double MAX_EXEC = 10000;
 
    for (unsigned t = 0; t < MAX_EXEC; t++) {
@@ -150,19 +148,13 @@ TEST_CASE("CryptoTest:  Test_SignData_EmptyMessage")
       vbyte sig = crypto.SignData(crypto.Sha256(msg), myprivkey, mypubkey);
 
       // test if signature matches public key for message
-      if (!crypto.VerifySignature(msg, sig, mypubkey))
-         countFail++;
+      REQUIRE(crypto.VerifySignature(msg, sig, mypubkey));
    }
-
-   // less than 5% failures
-   REQUIRE(countFail / MAX_EXEC <= 0.05);
 }
 
 TEST_CASE("CryptoTest:  Test_GeneratePublicKey")
 {
    Crypto crypto;
-
-   int countFail = 0;
 
    constexpr double MAX_EXEC = 10000;
 
@@ -177,12 +169,8 @@ TEST_CASE("CryptoTest:  Test_GeneratePublicKey")
       // test sizes
       REQUIRE(mypubkey.size() == otherpub.size());
       // test pubkeys
-      if (mypubkey != otherpub)
-         countFail++;
+      REQUIRE(mypubkey == otherpub);
    }
-
-   // less than 0% failures
-   REQUIRE(countFail / MAX_EXEC <= 0.00);
 }
 
 TEST_CASE("CryptoTest:  Test_XOR")

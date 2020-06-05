@@ -95,13 +95,16 @@ public:
    vbyte Sign(const vbyte& message, const SecureBytes& privkey, const vbyte& pubkey, bool verify = true) const
    {
       vbyte hashedMsg = Sha256(message);
-      vbyte signedMsg = SignData(hashedMsg, privkey, pubkey);
+      vbyte signedMsg = SignData(hashedMsg, privkey, pubkey, verify);
+      // No need to verify here!
+      /*
       if (verify)
          // try many times to sign... why do we need this?
          while (!VerifySignature(message, signedMsg, pubkey)) {
             std::cout << "WARNING: libcrypton 'verify' on Sign had to sign again..." << std::endl;
             signedMsg = SignData(hashedMsg, privkey, pubkey);
          }
+      */
       return signedMsg;
    }
 
@@ -126,7 +129,7 @@ public:
 */
 
    // TODO: receive pubkey or already ECPoint(X,Y) ?
-   vbyte SignData(const vbyte& digest, const SecureBytes& prikey, const vbyte& pubkey) const;
+   vbyte SignData(const vbyte& digest, const SecureBytes& prikey, const vbyte& pubkey, bool verify = true) const;
 
    virtual SecureBytes GenerateKeyPair(vbyte& vpubkey) const;
 

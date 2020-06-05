@@ -345,7 +345,7 @@ Crypto::AESDecrypt(const SecureBytes& cyphertext, const SecureBytes& key, const 
 // message is already received as a SHA256 digest
 // TODO: better to receive pubkey in general format or specific ECPoint(X,Y) ?
 vbyte
-Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& pubkey) const
+Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& pubkey, bool verify) const
 {
    //printf("\n\nSignData\n");
    // TODO: implement low level lSignData? (or keep C++ mixed?)
@@ -435,6 +435,18 @@ Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& p
 
    //, BN_bn2hex(signature->s)
 
+   int16 verif = 1;
+   if (verify) {
+      // ===============================
+      // check signature (paranoid mode)
+      // ===============================
+      // verify here if signature matches with 'useSha256 = false'
+      //
+      verif = lVerifySignature(digest.data(), digest.size(), vsig.data(), vsig.size(), pubkey.data(), pubkey.size(), false);
+      //
+      // ===============================
+   }
+
    ECDSA_SIG_free(signature);
    EC_KEY_free(eckey);
    EC_POINT_free(pub);
@@ -442,9 +454,11 @@ Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& p
    BN_free(bn);
    EC_GROUP_free(ecgroup);
 
-   // TODO: verify here if signature matches with 'useSha256 = false'
-
-   return std::move(vsig);
+   if (verif != 1) {
+      std::cout << "WARNING: libcrypton Signature not verified!" << std::endl;
+      return vbyte{};
+   } else
+      return vsig;
 }
 
 // =========================

@@ -69,6 +69,7 @@ public:
       return vbyte(0);
    }
 
+   // 'priv' is UNSIGNED BIG-ENDIAN BIG-INTEGER (of 32-bytes)
    virtual vbyte GetPublicKeyFromPrivateKey(const SecureBytes& priv, bool compressed) const
    {
       // TODO: if (!EC_POINT_mul(ecdsa->group, pub_key, priv_key, NULL, NULL, ctx))

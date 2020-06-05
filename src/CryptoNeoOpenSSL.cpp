@@ -347,6 +347,11 @@ Crypto::AESDecrypt(const SecureBytes& cyphertext, const SecureBytes& key, const 
 vbyte
 Crypto::SignData(const vbyte& digest, const SecureBytes& privkey, const vbyte& pubkey, bool verify) const
 {
+   // only compressed pubkey is accepted for the moment
+   if ((privkey.size() != 32) || (pubkey.size() != 33)) {
+      std::cout << "WARNING: libcrypton SignData bad inputs!" << std::endl;
+      return vbyte{};
+   }
    //printf("\n\nSignData\n");
    // TODO: implement low level lSignData? (or keep C++ mixed?)
    // TODO: apply SHA256 here to make sure?
@@ -665,6 +670,8 @@ Crypto::GenerateKeyPair(vbyte& vpubkey) const
 vbyte
 Crypto::GetPublicKeyFromPrivateKey(const SecureBytes& priv, bool compressed) const
 {
+   if (priv.size() != 32)
+      return vbyte{}; // ERROR
    // ctx is optional buffer
    BN_CTX* ctx = BN_CTX_new();
    // 'res' will receive private key value
@@ -687,7 +694,11 @@ Crypto::GetPublicKeyFromPrivateKey(const SecureBytes& priv, bool compressed) con
       return vbyte(0);
    }
 
-   EC_KEY_set_public_key(eckey, pub_key);
+   int out = EC_KEY_set_public_key(eckey, pub_key);
+   if (out == 0) {
+      std::cout << "WARNING: libcrypton error on pubkey set" << std::endl;
+      return vbyte{};
+   }
 
    char* cc;
 
@@ -701,13 +712,19 @@ Crypto::GetPublicKeyFromPrivateKey(const SecureBytes& priv, bool compressed) con
 
    vbyte vpubkey = chelper::HexToBytes(str);
 
+   if (compressed ? (vpubkey.size() != 33) : (vpubkey.size() != 64)) {
+      std::cout << "WARNING: libcrypton some strange pubkey occurred!" << std::endl;
+      std::cout << "c = '" << cc << "'  str='" << str << "'" << std::endl;
+      return vbyte{};
+   }
+
    BN_CTX_free(ctx);
 
    OPENSSL_free(cc);
 
    EC_KEY_free(eckey);
 
-   return std::move(vpubkey);
+   return vpubkey;
 }
 
 void

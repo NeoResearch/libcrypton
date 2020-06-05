@@ -252,3 +252,16 @@ TEST_CASE("CryptoTest:  Test_SecureBytes")
    REQUIRE(sb4.at(1) == 0x02);
    REQUIRE(sb4.at(2) == 0x03);
 }
+
+TEST_CASE("CryptoTest:  Test_GetPubkey_from_Zero_Private")
+{
+   Crypto crypto;
+   vbyte msg(0); // '': empty message
+   SecureBytes myprivkey(32, 0x00); // zero big int (Big-Endian)
+   //
+   vbyte mypubkey = crypto.GetPublicKeyFromPrivateKey(myprivkey, true); // compressed
+   //
+   // BAD PRIVATE KEY CANNOT GENERATE PUBKEY!
+   //
+   REQUIRE(mypubkey.size() == 0); 
+}

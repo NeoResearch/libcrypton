@@ -1,6 +1,6 @@
 # libcrypton
 
-## CryptoN: a cryptography library on C++ for Neo blockchain ecosystem
+## A cryptography library on C++ for Neo blockchain ecosystem
 
 This project is part of the [neopt](https://github.com/neoresearch/neopt) macro project, a C++ implementation of Neo Blockchain components, focused on portability.
 
